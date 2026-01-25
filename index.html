@@ -1,15 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Filmography</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"  rel="stylesheet"/>
-        <link href="/static/style.css" rel="stylesheet">
-        <script src="/static/htmx.min.js"></script>
-    </head>
-    <body>
-		Hello world!
-    </body>
-    <script src="/static/scripts.js"></script> 
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Database Manager Tool</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+	<link href="/static/style.css" rel="stylesheet">
+	<script src="/static/htmx.min.js"></script>
+</head>
+
+<body>
+	<nav>
+		<button id="CreateConnectionBTN">
+			Create Connection
+		</button>
+		<div id="ConnectionsList">
+			{{ block "ConnectionList" . }}
+			{{ range $Key, $Val := .Connections }}
+				<button hx-post="/Ping/{{ $Key }}" hx-target="#ConnectionResult"
+					hx-swap="innerhtml" >
+				{{ $Key }}
+			</button>
+			{{ end }}
+			{{ end }}
+		</div>
+	</nav>
+	<div id="ConnectionResult">
+	</div>
+
+	<div id="myModal" class="modal">
+		<div class="modal-content">
+			<span class="close" id="CloseConnectionFormBTN">&times;</span>
+			<h2 class="modal-header">Create connection</h2>
+			<form class="flex-column">
+				<div class="flex">
+					<div class="form-input">
+						<label>Server: </label>
+						<input type="text" name="Server" placeholder="Server" required />
+					</div>
+					<div class="form-input">
+						<label>Port: </label>
+						<input type="number" name="Port" placeholder="Port" value="1000" min="1000" max="9999" required />
+					</div>
+				</div>
+				<div class="form-input">
+					<label>Database: </label>
+					<input type="text" name="Database" placeholder="Database" required />
+				</div>
+				<div class="form-input">
+					<label>User: </label>
+					<input type="text" name="Username" placeholder="Username" required />
+				</div>
+				<div class="form-input">
+					<label>Password: </label>
+					<input type="password" name="Password" placeholder="Password" required />
+				</div>
+				<input hx-post="/Create/" hx-target="#ConnectionsList" hx-swap="innerhtml"
+					class="form-btn" type="submit" value="Connect" />
+			</form>
+		</div>
+	</div>
+</body>
+<script src="/static/scripts.js"></script>
+
 </html>

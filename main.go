@@ -19,17 +19,19 @@ const (
 )
 
 func main() {
-	cons, err := service.LoadConnections(JSON_PATH)
+	err := service.LoadConnections(JSON_PATH)
 	if err != nil {
 		log.Printf("%v", err)
 	}
-	defer service.SaveConnections(cons, JSON_PATH)
+	defer service.SaveConnections(JSON_PATH)
 
 	log.Println("Starting server...")
 	static := http.FileServer(http.Dir("static"))
 
 	http.Handle("/static/", http.StripPrefix("/static/", static))
 	http.HandleFunc("/", handler.Index)
+	http.HandleFunc("/Create/", handler.CreateConnection)
+	http.HandleFunc("/Ping/{database}", handler.Ping)
 
 	server := &http.Server{
 		Addr: ADDR,
