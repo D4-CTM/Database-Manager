@@ -1,0 +1,12 @@
+version: "3"
+services:
+  oracle-xe:
+    image: gvenzl/oracle-xe:21
+    container_name: oracle-xe
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: Password123 
+      APP_USER: user
+      APP_USER_PASSWORD: Password123 
+    restart: unless-stopped
