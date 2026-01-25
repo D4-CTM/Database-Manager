@@ -9,7 +9,7 @@ import (
 	"text/template"
 )
 
-var temp = template.Must(template.ParseFiles("index.html"))
+var temp = template.Must(template.ParseFiles("templates/base.html", "templates/ping.html"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
@@ -58,10 +58,15 @@ func CreateConnection(w http.ResponseWriter, r *http.Request) {
 func Ping(w http.ResponseWriter, r *http.Request) {
 	dbName := r.PathValue("database")
 	cred := service.Cons[dbName]
+	var errStr string = ""
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR] %v\n", err)
-		w.Write([]byte(err.Error()))
-		return
+		errStr = err.Error()
 	}
-	w.Write([]byte(cred.Database))
+
+	temp.ExecuteTemplate(w, "Connection", map[string]any{
+		"ConnectionStablished": errStr == "",
+		"Error": errStr,
+		"Key": dbName,
+	})
 }

@@ -18,15 +18,19 @@
 		<div id="ConnectionsList">
 			{{ block "ConnectionList" . }}
 			{{ range $Key, $Val := .Connections }}
-				<button hx-post="/Ping/{{ $Key }}" hx-target="#ConnectionResult"
-					hx-swap="innerhtml" >
+			<button hx-post="/Ping/{{ $Key }}" hx-target="#{{ $Key }}" hx-swap="innerhtml" 
+				class="collapsible" onclick="Collapsible(this)">
 				{{ $Key }}
 			</button>
+			<div id="{{ $Key }}" class="content">
+				{{ template "Connection" }}
+			</div>
 			{{ end }}
 			{{ end }}
 		</div>
 	</nav>
 	<div id="ConnectionResult">
+		test
 	</div>
 
 	<div id="myModal" class="modal">
@@ -41,7 +45,8 @@
 					</div>
 					<div class="form-input">
 						<label>Port: </label>
-						<input type="number" name="Port" placeholder="Port" value="1000" min="1000" max="9999" required />
+						<input type="number" name="Port" placeholder="Port" value="1000" min="1000" max="9999"
+							required />
 					</div>
 				</div>
 				<div class="form-input">
@@ -56,8 +61,8 @@
 					<label>Password: </label>
 					<input type="password" name="Password" placeholder="Password" required />
 				</div>
-				<input hx-post="/Create/" hx-target="#ConnectionsList" hx-swap="innerhtml"
-					class="form-btn" type="submit" value="Connect" />
+				<input hx-post="/Create/" hx-target="#ConnectionsList" hx-swap="innerhtml" class="form-btn"
+					type="submit" value="Connect" />
 			</form>
 		</div>
 	</div>
