@@ -31,12 +31,12 @@ function Collapsible(btn) {
 function handleResponse(event, btn) {
 	console.log("Handle")
     let xhr = event.detail.xhr;
-    let status = xhr.getResponseHeader("HX-Status");
+    let status = xhr.status;
     let message = xhr.getResponseHeader("HX-Message");
     
-    if (status != "100") {
+    if (status != 200) {
         alert(message);
+		Collapsible(btn);
     }
 
-	Collapsible(btn)
 }

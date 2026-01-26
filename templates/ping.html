@@ -1,58 +1,10 @@
 {{ define "Connection" }}
-{{ if .ConnectionStablished }}
-<button hx-post="/Tables/{{ .Key }}" hx-target="{{ .Key }}-tables" hx-swap="innerhtml"
+{{ range $t := .Options }}
+<button hx-post="/{{ $t }}/{{ $.Key }}" hx-target="{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
 	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Tables
+	{{ $t }}
 </button>
-<div id="{{ .Key }}-tables" class="content">
-</div>
-<button hx-post="/Views/{{ .Key }}" hx-target="{{ .Key }}-views" hx-swap="innerhtml"
-	chx-on::after-request="handleResponse(event, this)" lass="collapsible" onclick="Collapsible(this)">
-	Views
-</button>
-<div id="{{ .Key }}-views" class="content">
-</div>
-<button hx-post="/Procedures/{{ .Key }}" hx-target="{{ .Key }}-procedures" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Procedures
-</button>
-<div id="{{ .Key }}-procedures" class="content">
-</div>
-<button hx-post="/Functions/{{ .Key }}" hx-target="{{ .Key }}-funcs" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Functions
-</button>
-<div id="{{ .Key }}-funcs" class="content">
-</div>
-<button hx-post="/Packages/{{ .Key }}" hx-target="{{ .Key }}-packs" hx-swap="innerhtml" 
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Packages
-</button>
-<div id="{{ .Key }}-packs" class="content">
-</div>
-<button hx-post="/Sequences/{{ .Key }}" hx-target="{{ .Key }}-seqs" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Sequences
-</button>
-<div id="{{ .Key }}-seqs" class="content">
-</div>
-<button hx-post="/Triggers/{{ .Key }}" hx-target="{{ .Key }}-trig" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Triggers
-</button>
-<div id="{{ .Key }}-trig" class="content">
-</div>
-<button hx-post="/Indices/{{ .Key }}" hx-target="{{ .Key }}-indices" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	indices
-</button>
-<div id="{{ .Key }}-indices" class="content">
-</div>
-<button hx-post="/Users/{{ .Key }}" hx-target="{{ .Key }}-users" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
-	Users
-</button>
-<div id="{{ .Key }}-users" class="content">
+<div id="{{ $.Key }}-{{ $t }}" class="content">
 </div>
 {{ end }}
 {{ end }}
