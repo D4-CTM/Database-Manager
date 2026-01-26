@@ -12,6 +12,7 @@ import (
 var temp = template.Must(template.ParseFiles("templates/base.html", "templates/ping.html"))
 
 func writeStatusMessage(w http.ResponseWriter, status int, message string) {
+	log.Printf("[INFO] Writing status message: %s\n", message)
 	w.Header().Set("HX-Message", message)
 	w.WriteHeader(status)
 }
@@ -44,7 +45,7 @@ func CreateConnection(w http.ResponseWriter, r *http.Request) {
 		idx := 1
 		for name := range service.Cons {
 			if name == conName {
-				conName = fmt.Sprintf("%s %d", dbName, idx)
+				conName = fmt.Sprintf("%s_%d", dbName, idx)
 				idx++
 			}
 		}
@@ -87,4 +88,40 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 		},
 		"Key": dbName,
 	})
+}
+
+func Tables(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Views(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Procedures(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Functions(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Packages(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Sequences(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Triggers(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Indices(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+}
+
+func Users(w http.ResponseWriter, r *http.Request) {
+	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
 }

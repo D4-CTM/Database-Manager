@@ -29,14 +29,16 @@ function Collapsible(btn) {
 }
 
 function handleResponse(event, btn) {
-	console.log("Handle")
     let xhr = event.detail.xhr;
-    let status = xhr.status;
+	if (xhr.status == 200) {
+		return
+	}
+
     let message = xhr.getResponseHeader("HX-Message");
     
-    if (status != 200) {
-        alert(message);
-		Collapsible(btn);
-    }
+	alert(message);
 
+	if (btn.classList.contains("Collapsible")) {
+		Collapsible(btn);
+	}
 }

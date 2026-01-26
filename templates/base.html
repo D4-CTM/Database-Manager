@@ -18,7 +18,7 @@
 		<div id="ConnectionsList">
 			{{ block "ConnectionList" . }}
 			{{ range $Key, $Val := .Connections }}
-			<button hx-post="/Ping/{{ $Key }}" hx-target="#{{ $Key }}" hx-swap="innerhtml" class="collapsible"
+			<button hx-get="/Ping/{{ $Key }}" hx-target="#{{ $Key }}" hx-swap="innerhtml" class="collapsible"
 				hx-on::after-request="handleResponse(event, this)" onclick="Collapsible(this)">
 				{{ $Key }}
 			</button>

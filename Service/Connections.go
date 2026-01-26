@@ -18,25 +18,26 @@ func (c *Connections) close() {
 
 var Cons Connections
 
-
-func SaveConnections(path string) error {
+func SaveConnections(path string) {
 	if len(Cons) == 0 {
-		return nil
+		return 
 	}
 	Cons.close()
 
 	f, err := os.Create(path)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	j := json.NewEncoder(f)
 	j.SetIndent("", "\t")
 
 	if err = j.Encode(Cons); err != nil {
-		return err
+		log.Fatal(err)
 	}
 
-	return nil
+	for k := range Cons {
+		delete(Cons, k)
+	}
 }
 
 func LoadConnections(path string) error {

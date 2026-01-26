@@ -32,6 +32,15 @@ func main() {
 	http.HandleFunc("/", handler.Index)
 	http.HandleFunc("/Create/", handler.CreateConnection)
 	http.HandleFunc("/Ping/{database}", handler.Ping)
+	http.HandleFunc("/Tables/{database}", handler.Tables)
+	http.HandleFunc("/Views/{database}", handler.Views)
+	http.HandleFunc("/Procedures/{database}", handler.Procedures)
+	http.HandleFunc("/Functions/{database}", handler.Functions)
+	http.HandleFunc("/Packages/{database}", handler.Packages)
+	http.HandleFunc("/Sequences/{database}", handler.Sequences)
+	http.HandleFunc("/Triggers/{database}", handler.Triggers)
+	http.HandleFunc("/Indices/{database}", handler.Indices)
+	http.HandleFunc("/Users/{database}", handler.Users)
 
 	server := &http.Server{
 		Addr: ADDR,

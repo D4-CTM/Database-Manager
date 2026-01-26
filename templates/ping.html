@@ -1,7 +1,7 @@
 {{ define "Connection" }}
 {{ range $t := .Options }}
-<button hx-post="/{{ $t }}/{{ $.Key }}" hx-target="{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)" class="collapsible" onclick="Collapsible(this)">
+<button hx-get="/{{ $t }}/{{ $.Key }}" hx-target="#{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
+	hx-on::after-request="handleResponse(event, this)">
 	{{ $t }}
 </button>
 <div id="{{ $.Key }}-{{ $t }}" class="content">
