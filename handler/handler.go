@@ -11,6 +11,12 @@ import (
 
 var temp = template.Must(template.ParseFiles("templates/base.html", "templates/ping.html"))
 
+func writeStatusMessage(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("HX-Status", fmt.Sprint(status))
+	w.Header().Set("HX-Message", message)
+	w.WriteHeader(status)
+}
+
 func Index(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"Connections": service.Cons,
@@ -18,6 +24,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	if err := temp.Execute(w, data); err != nil {
 		log.Printf("%v", err)
 		w.Write([]byte(err.Error()))
+		writeStatusMessage(w, http.StatusBadGateway, "Error executing the template")
 	}
 }
 
@@ -46,6 +53,7 @@ func CreateConnection(w http.ResponseWriter, r *http.Request) {
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR on Connect()] %v", err)
 		w.Write([]byte(err.Error()))
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", conName))
 		return 
 	}
 
@@ -62,11 +70,12 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR] %v\n", err)
 		errStr = err.Error()
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", dbName))
+		return 
 	}
 
 	temp.ExecuteTemplate(w, "Connection", map[string]any{
 		"ConnectionStablished": errStr == "",
-		"Error": errStr,
 		"Key": dbName,
 	})
 }

@@ -27,3 +27,16 @@ function Collapsible(btn) {
 	  content.style.display = "block";
 	}
 }
+
+function handleResponse(event, btn) {
+	console.log("Handle")
+    let xhr = event.detail.xhr;
+    let status = xhr.getResponseHeader("HX-Status");
+    let message = xhr.getResponseHeader("HX-Message");
+    
+    if (status != "100") {
+        alert(message);
+    }
+
+	Collapsible(btn)
+}
