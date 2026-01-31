@@ -7,8 +7,8 @@ services:
       - "1521:1521"
     environment:
       ORACLE_PASSWORD: sys_pass
-      APP_USER: user 
-      APP_USER_PASSWORD: user_pass
+      APP_USER: appuser 
+      APP_USER_PASSWORD: appuser_pass
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 10s

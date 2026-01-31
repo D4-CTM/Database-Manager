@@ -1,10 +1,20 @@
 {{ define "Connection" }}
 {{ range $t := .Options }}
 <button hx-get="/{{ $t }}/{{ $.Key }}" hx-target="#{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
-	hx-on::after-request="handleResponse(event, this)">
-	{{ $t }}
+	hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)" 
+	class="collapsible" onclick="Collapsible(this); OpenFolder(this)">
+	<label><i class="fai fa fa-folder"></i>{{ $t }}</label>
 </button>
 <div id="{{ $.Key }}-{{ $t }}" class="content">
+	{{ template "Data" }}
 </div>
+{{ end }}
+{{ end }}
+{{ define "Data" }}
+{{ range $d := .data }}
+<button hx-get="/Data/{{ $.Opt }}/{{ $d }}" hx-target="#ConnectionResult" hx-swap="innerhtml"
+	hx-on::after-request="handleResponse(event, this)" class="collapsible">
+	<label class="data-label"><i class="fai fa fa-{{ $.icon }}"></i>{{ $d }}</label>
+</button>
 {{ end }}
 {{ end }}

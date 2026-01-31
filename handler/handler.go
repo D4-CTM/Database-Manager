@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -55,7 +56,7 @@ func CreateConnection(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[ERROR on Connect()] %v", err)
 		w.Write([]byte(err.Error()))
 		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", conName))
-		return 
+		return
 	}
 
 	service.Cons[conName] = cred
@@ -71,7 +72,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR] %v\n", err)
 		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", dbName))
-		return 
+		return
 	}
 
 	temp.ExecuteTemplate(w, "Connection", map[string]any{
@@ -90,12 +91,85 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Fetches tables owned by database user
 func Tables(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+	dbName := r.PathValue("database")
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", dbName))
+		return
+	}
+
+	query := `
+	SELECT
+		table_name
+	FROM
+		sys.all_tables
+	WHERE
+		owner = :1
+	`
+
+	db := cred.GetDB()
+	tables := []string{}
+	row, err := db.Query(query, strings.ToUpper(cred.User))
+	if err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch tables from: %s", dbName))
+		return
+	}
+	defer row.Close()
+	t := ""
+	for row.Next() {
+		row.Scan(&t)
+		tables = append(tables, t)
+	}
+
+	temp.ExecuteTemplate(w, "Data", map[string]any{
+		"data": tables,
+		"Opt":  "Table",
+		"icon": "table",
+	})
 }
 
 func Views(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
+	dbName := r.PathValue("database")
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", dbName))
+		return
+	}
+
+	query := `
+	SELECT
+		view_name
+	FROM
+		sys.all_views
+	WHERE
+		owner = :1
+	`
+
+	db := cred.GetDB()
+	views := []string{}
+	row, err := db.Query(query, strings.ToUpper(cred.User))
+	if err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch tables from: %s", dbName))
+		return
+	}
+	defer row.Close()
+	v := ""
+	for row.Next() {
+		row.Scan(&v)
+		views = append(views, v)
+	}
+
+	temp.ExecuteTemplate(w, "Data", map[string]any{
+		"data": views,
+		"Opt":  "View",
+		"icon": "eye",
+	})
 }
 
 func Procedures(w http.ResponseWriter, r *http.Request) {

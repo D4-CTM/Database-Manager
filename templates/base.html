@@ -19,8 +19,9 @@
 			{{ block "ConnectionList" . }}
 			{{ range $Key, $Val := .Connections }}
 			<button hx-get="/Ping/{{ $Key }}" hx-target="#{{ $Key }}" hx-swap="innerhtml" class="collapsible"
-				hx-on::after-request="handleResponse(event, this)" onclick="Collapsible(this)">
-				{{ $Key }}
+				hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)"
+				onclick="Collapsible(this)">
+				<i class="fa fa-database"></i>{{ $Key }}
 			</button>
 			<div id="{{ $Key }}" class="content">
 				{{ template "Connection" }}
