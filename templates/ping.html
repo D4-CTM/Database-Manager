@@ -1,7 +1,7 @@
 {{ define "Connection" }}
 {{ range $t := .Options }}
 <button hx-get="/{{ $t }}/{{ $.Key }}" hx-target="#{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
-	hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)" 
+	hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)"
 	class="collapsible" onclick="Collapsible(this); OpenFolder(this)">
 	<label><i class="fai fa fa-folder"></i>{{ $t }}</label>
 </button>

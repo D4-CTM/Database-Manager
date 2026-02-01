@@ -39,7 +39,7 @@ func main() {
 	http.HandleFunc("/Packages/{database}", handler.Packages)
 	http.HandleFunc("/Sequences/{database}", handler.Sequences)
 	http.HandleFunc("/Triggers/{database}", handler.Triggers)
-	http.HandleFunc("/Indices/{database}", handler.Indices)
+	http.HandleFunc("/Indices/{database}", handler.Indexes)
 	http.HandleFunc("/Users/{database}", handler.Users)
 
 	server := &http.Server{

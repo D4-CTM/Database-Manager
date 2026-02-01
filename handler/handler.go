@@ -91,8 +91,11 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Fetches tables owned by database user
-func Tables(w http.ResponseWriter, r *http.Request) {
+// Params:
+// ss - Select Statement
+// table - Db Table
+// wc - where condition
+func fetchData(w http.ResponseWriter, r *http.Request, ss string, table string, wc string, data map[string]any) {
 	dbName := r.PathValue("database")
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
@@ -101,38 +104,100 @@ func Tables(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 	SELECT
-		table_name
+		%s
 	FROM
-		sys.all_tables
+		%s
 	WHERE
-		owner = :1
-	`
+		%s;
+	`, ss, table, wc)
 
 	db := cred.GetDB()
-	tables := []string{}
+	trigger := []string{}
 	row, err := db.Query(query, strings.ToUpper(cred.User))
 	if err != nil {
 		log.Printf("[ERROR] %v\n", err)
-		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch tables from: %s", dbName))
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch %s from: %s", ss, dbName))
 		return
 	}
 	defer row.Close()
 	t := ""
 	for row.Next() {
 		row.Scan(&t)
-		tables = append(tables, t)
+		trigger = append(trigger, t)
 	}
 
-	temp.ExecuteTemplate(w, "Data", map[string]any{
-		"data": tables,
+	data["data"] = trigger
+	temp.ExecuteTemplate(w, "Data", data)
+}
+
+// Fetches tables owned by database user
+func Tables(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
 		"Opt":  "Table",
 		"icon": "table",
-	})
+	}
+	fetchData(w, r, "table_name", "sys.all_tables", "owner = :1", data)
 }
 
 func Views(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "View",
+		"icon": "eye",
+	}
+	fetchData(w, r, "view_name", "sys.all_views", "owner = :1", data)
+}
+
+func Procedures(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "Procedures",
+		"icon": "code",
+	}
+	fetchData(w, r, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'PROCEDURE'", data)
+}
+
+func Functions(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "Functions",
+		"icon": "code",
+	}
+	fetchData(w, r, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'FUNCTION'", data)
+}
+
+func Packages(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "Packages",
+		"icon": "linode",
+	}
+	fetchData(w, r, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'PACKAGE'", data)
+}
+
+func Sequences(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "Sequences",
+		"icon": "line-chart",
+	}
+	fetchData(w, r, "sequence_name", "sys.all_sequences", "sequence_owner = :1", data)
+}
+
+func Triggers(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "Triggers",
+		"icon": "exchange",
+	}
+	fetchData(w, r, "trigger_name", "sys.all_triggers", "owner = :1", data)
+}
+
+func Indexes(w http.ResponseWriter, r *http.Request) {
+	data := map[string]any{
+		"Opt":  "Triggers",
+		"icon": "exchange",
+	}
+	fetchData(w, r, "index_name", "sys.all_indexes", "owner = :1", data)
+}
+
+func Users(w http.ResponseWriter, r *http.Request) {
 	dbName := r.PathValue("database")
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
@@ -143,59 +208,29 @@ func Views(w http.ResponseWriter, r *http.Request) {
 
 	query := `
 	SELECT
-		view_name
+		username
 	FROM
-		sys.all_views
-	WHERE
-		owner = :1
+		sys.all_users;
 	`
 
 	db := cred.GetDB()
-	views := []string{}
-	row, err := db.Query(query, strings.ToUpper(cred.User))
+	users := []string{}
+	row, err := db.Query(query)
 	if err != nil {
 		log.Printf("[ERROR] %v\n", err)
-		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch tables from: %s", dbName))
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch users from: %s", dbName))
 		return
 	}
 	defer row.Close()
-	v := ""
+	u := ""
 	for row.Next() {
-		row.Scan(&v)
-		views = append(views, v)
+		row.Scan(&u)
+		users = append(users, u)
 	}
 
 	temp.ExecuteTemplate(w, "Data", map[string]any{
-		"data": views,
-		"Opt":  "View",
-		"icon": "eye",
+		"data": users,
+		"Opt":  "Users",
+		"icon": "user",
 	})
-}
-
-func Procedures(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
-}
-
-func Functions(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
-}
-
-func Packages(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
-}
-
-func Sequences(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
-}
-
-func Triggers(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
-}
-
-func Indices(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
-}
-
-func Users(w http.ResponseWriter, r *http.Request) {
-	writeStatusMessage(w, http.StatusNotImplemented, "Not implemented")
 }
