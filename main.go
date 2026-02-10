@@ -33,16 +33,18 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", static))
 	http.HandleFunc("/", handler.Index)
 	http.HandleFunc("/Create/", handler.CreateConnection)
-	http.HandleFunc("/Ping/{database}", handler.Ping)
-	http.HandleFunc("/Tables/{database}", handler.Tables)
-	http.HandleFunc("/Views/{database}", handler.Views)
-	http.HandleFunc("/Procedures/{database}", handler.Procedures)
-	http.HandleFunc("/Functions/{database}", handler.Functions)
-	http.HandleFunc("/Packages/{database}", handler.Packages)
-	http.HandleFunc("/Sequences/{database}", handler.Sequences)
-	http.HandleFunc("/Triggers/{database}", handler.Triggers)
-	http.HandleFunc("/Indices/{database}", handler.Indexes)
-	http.HandleFunc("/Users/{database}", handler.Users)
+	http.HandleFunc("/Ping/{database}/", handler.Ping)
+	http.HandleFunc("/Options/{database}/{schema}", handler.Options)
+
+	http.HandleFunc("/Tables/{database}/{schema}", handler.Tables)
+	http.HandleFunc("/Views/{database}/{schema}", handler.Views)
+	http.HandleFunc("/Procedures/{database}/{schema}", handler.Procedures)
+	http.HandleFunc("/Functions/{database}/{schema}", handler.Functions)
+	http.HandleFunc("/Packages/{database}/{schema}", handler.Packages)
+	http.HandleFunc("/Sequences/{database}/{schema}", handler.Sequences)
+	http.HandleFunc("/Triggers/{database}/{schema}", handler.Triggers)
+	http.HandleFunc("/Indices/{database}/{schema}", handler.Indexes)
+	http.HandleFunc("/Users/{database}/{schema}", handler.Users)
 
 	server := &http.Server{
 		Addr: ADDR,

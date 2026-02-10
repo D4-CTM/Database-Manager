@@ -74,7 +74,44 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	temp.ExecuteTemplate(w, "Connection", map[string]any{
+	query := `
+	SELECT
+		username
+	FROM
+		sys.all_users;
+	`
+
+	db := cred.GetDB()
+	users := []string{}
+	row, err := db.Query(query)
+	if err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch users from: %s", dbName))
+		return
+	}
+	defer row.Close()
+	u := ""
+	for row.Next() {
+		row.Scan(&u)
+		if (u == cred.User) {
+			continue
+		}
+		users = append(users, u)
+	}
+
+	temp.ExecuteTemplate(w, "Schemas", map[string]any{
+		"Schemas": users,
+		"User": strings.ToUpper(cred.User),
+		"Database": cred.Database,
+		"Key": dbName,
+	})
+}
+
+func Options(w http.ResponseWriter, r *http.Request) {
+	dbName := r.PathValue("database")
+	schema := r.PathValue("schema")
+
+	temp.ExecuteTemplate(w, "Options", map[string]any{
 		"Options": []string{
 			"Tables",
 			"Views",
@@ -84,8 +121,8 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 			"Sequences",
 			"Triggers",
 			"Indices",
-			"Users",
 		},
+		"Schema": schema,
 		"Key": dbName,
 	})
 }
@@ -96,6 +133,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 // wc - where condition
 func fetchData(w http.ResponseWriter, r *http.Request, ss string, table string, wc string, data map[string]any) {
 	dbName := r.PathValue("database")
+	schema := r.PathValue("schema")
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR] %v\n", err)
@@ -114,7 +152,7 @@ func fetchData(w http.ResponseWriter, r *http.Request, ss string, table string, 
 
 	db := cred.GetDB()
 	trigger := []string{}
-	row, err := db.Query(query, strings.ToUpper(cred.User))
+	row, err := db.Query(query, strings.ToUpper(schema))
 	if err != nil {
 		log.Printf("[ERROR] %v\n", err)
 		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch %s from: %s", ss, dbName))

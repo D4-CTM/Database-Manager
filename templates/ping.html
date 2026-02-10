@@ -1,8 +1,22 @@
-{{ define "Connection" }}
-{{ range $t := .Options }}
-<button hx-get="/{{ $t }}/{{ $.Key }}" hx-target="#{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
+{{ define "Schemas" }}
+{{ range $s := .Schemas }}
+<button hx-get="/Options/{{ $.Key }}/{{ $s }}" hx-target="#{{ $.Key }}-{{ $s }}" hx-swap="innerhtml"
 	hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)"
 	class="collapsible" onclick="Collapsible(this); OpenFolder(this)">
+	<label {{ if eq $s $.User }} style="font-weight: bolder;" {{ else }} style="font-style: italic;" {{ end }}>
+		<i class="fai fa fa-user"></i>{{ $s }}
+	</label>
+</button>
+<div id="{{ $.Key }}-{{ $s }}" class="content">
+	{{ template "Options" }}
+</div>
+{{ end }}
+{{ end }}
+{{ define "Options" }}
+{{ range $t := .Options }}
+<button hx-get="/{{ $t }}/{{ $.Key }}/{{ $.Schema }}" hx-target="#{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
+	hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)"
+	class="sec_btn collapsible" ondblclick="openMulti()" onclick="Collapsible(this); OpenFolder(this)">
 	<label><i class="fai fa fa-folder"></i>{{ $t }}</label>
 </button>
 <div id="{{ $.Key }}-{{ $t }}" class="content">
