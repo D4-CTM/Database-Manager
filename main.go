@@ -9,16 +9,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 )
 
 const (
 	ADDR string = ":5461"
-	JSON_PATH string = "data.json"
 )
 
 func main() {
+	JSON_PATH := path.Join(os.Getenv("CREDS_SUBDIR"), "data.json")
+
 	err := service.LoadConnections(JSON_PATH)
 	if err != nil {
 		log.Printf("%v", err)

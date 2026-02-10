@@ -54,7 +54,6 @@ func CreateConnection(w http.ResponseWriter, r *http.Request) {
 
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR on Connect()] %v", err)
-		w.Write([]byte(err.Error()))
 		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't stablish connection with %s", conName))
 		return
 	}
