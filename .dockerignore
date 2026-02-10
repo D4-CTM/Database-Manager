@@ -1,0 +1,10 @@
+queries/
+docker/
+Dockerfile
+data.json
+docker-compose.yml
+go.mod
+go.sum
+
+.git/
+.gitignore

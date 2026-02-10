@@ -1,5 +1,14 @@
-version: "3.8"
 services:
+#  goapp:
+#    build: .
+#    container_name: dbmt
+#    ports:
+#      - "5461:5461"
+#    environment:
+#      CREDS_SUBDIR: credentials
+#    volumes:
+#      - ./docker:/usr/src/app/credentials
+
   oracle-xe:
     image: gvenzl/oracle-free:23-slim
     container_name: oracle
