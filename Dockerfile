@@ -1,24 +1,30 @@
-FROM golang:1.23-alpine3.20 
+FROM golang:1.26.0-bookworm
 
-RUN apk add --no-cache unzip curl gcc musl-dev libaio
+RUN apt-get update && apt-get install -y \
+    unzip \
+    curl \
+    libaio1 \
+    gcc \
+    libc6-dev
 
-RUN mkdir -p /opt/oracle/
+WORKDIR /opt/oracle
 
-RUN curl -o ic.zip https://download.oracle.com/otn_software/linux/instantclient/2326100/instantclient-basic-linux.x64-23.26.1.0.0.zip \
-    && unzip ic.zip -d /opt/oracle/instantclient_23_26 \
+RUN curl -o ic.zip https://download.oracle.com/otn_software/linux/instantclient/2360000/instantclient-basic-linux.x64-23.6.0.24.10.zip \
+    && unzip ic.zip \
     && rm ic.zip
 
-ENV LD_LIBRARY_PATH="/opt/oracle/instantclient_23_26"
-ENV CGO_ENABLED=1 
+ENV LD_LIBRARY_PATH="/opt/oracle/instantclient_23_6"
+ENV CGO_ENABLED=1
 
-WORKDIR /usr/src/app
-
-RUN go mod init dbmt
-RUN go get github.com/godror/godror
+WORKDIR /app
 
 COPY . .
-
+RUN go mod download
 RUN go build -o dbmt .
+
+WORKDIR /app
+
+ENV LD_LIBRARY_PATH="/opt/oracle/instantclient_23_6"
 
 EXPOSE 5461
 
