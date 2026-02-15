@@ -16,7 +16,7 @@
 {{ range $t := .Options }}
 <button hx-get="/{{ $t }}/{{ $.Key }}/{{ $.Schema }}" hx-target="#{{ $.Key }}-{{ $t }}" hx-swap="innerhtml"
 	hx-on::before-request="IsCollapsed(this, event)" hx-on::after-request="handleResponse(event, this)"
-	class="sec_btn collapsible" ondblclick="openMulti()" onclick="Collapsible(this); OpenFolder(this)">
+	class="collapsible" onclick="Collapsible(this); OpenFolder(this)">
 	<label><i class="fai fa fa-folder"></i>{{ $t }}</label>
 </button>
 <div id="{{ $.Key }}-{{ $t }}" class="content">
@@ -26,7 +26,7 @@
 {{ end }}
 {{ define "Data" }}
 {{ range $d := .data }}
-<button hx-get="/Data/{{ $.Opt }}/{{ $d }}" hx-target="#ConnectionResult" hx-swap="innerhtml"
+<button hx-get="/Query/{{ $.ConName }}?Table={{ $d }}&Owner={{ $.Schema }}" hx-target="#ConnectionResult" hx-swap="innerhtml"
 	hx-on::after-request="handleResponse(event, this)" class="collapsible">
 	<label class="data-label"><i class="fai fa fa-{{ $.icon }}"></i>{{ $d }}</label>
 </button>

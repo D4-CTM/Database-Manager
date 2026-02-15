@@ -44,7 +44,8 @@ func main() {
 	http.HandleFunc("/Sequences/{database}/{schema}", handler.Sequences)
 	http.HandleFunc("/Triggers/{database}/{schema}", handler.Triggers)
 	http.HandleFunc("/Indices/{database}/{schema}", handler.Indexes)
-	http.HandleFunc("/Users/{database}/{schema}", handler.Users)
+
+	http.HandleFunc("/Query/{database}", handler.Query)
 
 	server := &http.Server{
 		Addr: ADDR,

@@ -151,7 +151,7 @@ func fetchData(w http.ResponseWriter, r *http.Request, ss string, table string, 
 	`, ss, table, wc)
 
 	db := cred.GetDB()
-	trigger := []string{}
+	values := []string{}
 	row, err := db.Query(query, strings.ToUpper(schema))
 	if err != nil {
 		log.Printf("[ERROR] %v\n", err)
@@ -159,20 +159,21 @@ func fetchData(w http.ResponseWriter, r *http.Request, ss string, table string, 
 		return
 	}
 	defer row.Close()
-	t := ""
+	val := ""
 	for row.Next() {
-		row.Scan(&t)
-		trigger = append(trigger, t)
+		row.Scan(&val)
+		values = append(values, val)
 	}
 
-	data["data"] = trigger
+	data["data"] = values
+	data["Schema"] = schema
+	data["ConName"] = dbName
 	temp.ExecuteTemplate(w, "Data", data)
 }
 
 // Fetches tables owned by database user
 func Tables(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Table",
 		"icon": "table",
 	}
 	fetchData(w, r, "table_name", "sys.all_tables", "owner = :1", data)
@@ -180,7 +181,6 @@ func Tables(w http.ResponseWriter, r *http.Request) {
 
 func Views(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "View",
 		"icon": "eye",
 	}
 	fetchData(w, r, "view_name", "sys.all_views", "owner = :1", data)
@@ -188,7 +188,6 @@ func Views(w http.ResponseWriter, r *http.Request) {
 
 func Procedures(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Procedures",
 		"icon": "code",
 	}
 	fetchData(w, r, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'PROCEDURE'", data)
@@ -196,7 +195,6 @@ func Procedures(w http.ResponseWriter, r *http.Request) {
 
 func Functions(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Functions",
 		"icon": "code",
 	}
 	fetchData(w, r, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'FUNCTION'", data)
@@ -204,7 +202,6 @@ func Functions(w http.ResponseWriter, r *http.Request) {
 
 func Packages(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Packages",
 		"icon": "linode",
 	}
 	fetchData(w, r, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'PACKAGE'", data)
@@ -212,7 +209,6 @@ func Packages(w http.ResponseWriter, r *http.Request) {
 
 func Sequences(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Sequences",
 		"icon": "line-chart",
 	}
 	fetchData(w, r, "sequence_name", "sys.all_sequences", "sequence_owner = :1", data)
@@ -220,7 +216,6 @@ func Sequences(w http.ResponseWriter, r *http.Request) {
 
 func Triggers(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Triggers",
 		"icon": "exchange",
 	}
 	fetchData(w, r, "trigger_name", "sys.all_triggers", "owner = :1", data)
@@ -228,14 +223,20 @@ func Triggers(w http.ResponseWriter, r *http.Request) {
 
 func Indexes(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Opt":  "Triggers",
 		"icon": "exchange",
 	}
 	fetchData(w, r, "index_name", "sys.all_indexes", "owner = :1", data)
 }
 
-func Users(w http.ResponseWriter, r *http.Request) {
+func Query(w http.ResponseWriter, r *http.Request) {	
 	dbName := r.PathValue("database")
+	urlQuery := r.URL.Query()
+	table := urlQuery.Get("Table")
+	owner := strings.TrimSpace(urlQuery.Get("Owner"))
+	if (len(owner) > 0) {
+		table = fmt.Sprintf("%s.%s", owner, table)
+	}
+
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
 		log.Printf("[ERROR] %v\n", err)
@@ -243,31 +244,50 @@ func Users(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `
-	SELECT
-		username
-	FROM
-		sys.all_users;
-	`
-
 	db := cred.GetDB()
-	users := []string{}
-	row, err := db.Query(query)
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", table))
 	if err != nil {
 		log.Printf("[ERROR] %v\n", err)
-		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch users from: %s", dbName))
+		writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't fetch %s from: %s", table, dbName))
 		return
 	}
-	defer row.Close()
-	u := ""
-	for row.Next() {
-		row.Scan(&u)
-		users = append(users, u)
-	}
+	defer rows.Close()
 
-	temp.ExecuteTemplate(w, "Data", map[string]any{
-		"data": users,
-		"Opt":  "Users",
-		"icon": "user",
-	})
+	cols, err := rows.Columns()
+	if err != nil {
+		log.Printf("[WARN] Column couldn't be read!\n[ERROR] Error: %v", err)
+		return
+	}
+	colLen := len(cols)
+	result := []map[string]any{}
+
+	for rows.Next() {
+		columns := make([]any, colLen)
+		columnPointers := make([]any, colLen)
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+
+		if err := rows.Scan(columnPointers...); err != nil {
+			log.Printf("[ERROR] %v\n", err)
+			writeStatusMessage(w, http.StatusBadGateway, fmt.Sprintf("Couldn't columns of %s from: %s", table, dbName))
+			return
+        }
+
+        // 5. Map column names to values
+        rowData := make(map[string]any)
+        for i, colName := range cols {
+            val := columns[i]
+            
+            // Handle []byte (common for strings/dates in some drivers)
+            if b, ok := val.([]byte); ok {
+                rowData[colName] = string(b)
+            } else {
+                rowData[colName] = val
+            }
+			fmt.Printf("%v ", rowData[colName])
+        }
+        result = append(result, rowData)
+		fmt.Println()
+	}
 }
