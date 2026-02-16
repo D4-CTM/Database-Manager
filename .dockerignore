@@ -1,9 +1,5 @@
-init-scripts/
-queries/
 docker/
-Dockerfile
 data.json
-docker-compose.yml
 
 .git/
 .gitignore
