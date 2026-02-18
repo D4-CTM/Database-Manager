@@ -1,4 +1,3 @@
 **/data.json
-docker/credentials/
+**/credentials/
 init-scripts/
-data/

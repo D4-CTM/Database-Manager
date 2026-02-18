@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path"
 )
 
 type Connections map[string]Credentials
@@ -32,7 +33,7 @@ func SaveConnections(path string) {
 	j.SetIndent("", "\t")
 
 	if err = j.Encode(Cons); err != nil {
-		log.Fatal(err)
+		log.Printf("[ERROR] %v",err)
 	}
 
 	for k := range Cons {
@@ -40,10 +41,15 @@ func SaveConnections(path string) {
 	}
 }
 
-func LoadConnections(path string) error {
-	bytes, err := os.ReadFile(path)
+func LoadConnections(credsPath string) error {
+	bytes, err := os.ReadFile(credsPath)
 	if err != nil {
 		Cons = make(Connections)
+		if os.IsNotExist(err) {
+			if internErr := os.MkdirAll(path.Dir(credsPath), 0700); internErr != nil {
+				return internErr
+			}
+		}
 		return err
 	}
 
