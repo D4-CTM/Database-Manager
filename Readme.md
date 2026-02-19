@@ -8,15 +8,15 @@
 
 Primary Languages:
 - Golang
-- HTML
-- CSS
-- Js
+- Vue
+- Css
 
 Dependencies:
 * Godror
+* Gin
 * HTMX
 
 Tools:
++ Bun
 + Docker
 + libclntsh 23
-
