@@ -3,7 +3,9 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/godror/godror"
 )
 
@@ -21,8 +23,37 @@ type Credentials struct {
 	// Ui indicator
 	ShowAll bool
 
-	db *sql.DB
+	db      *sql.DB
 }
+
+type Table struct {
+	Name        string
+	ColumnNames []string
+	Rows        [][]any
+}
+
+func CreateCredFromGin(c *gin.Context) Credentials {
+	i, _ := strconv.Atoi(c.Request.PostFormValue("Port"))
+	showAll := c.Request.PostFormValue("ShowAll")
+	return Credentials{
+		Server:   c.Request.PostFormValue("Server"),
+		Port:     i,
+		Database: c.Request.PostFormValue("Database"),
+		User:     c.Request.PostFormValue("Username"),
+		Password: c.Request.PostFormValue("Password"),
+		ShowAll:  showAll == "on",
+	}
+
+}
+
+/*
+'{
+	"Port": 0,
+	"Database": "test",
+	"Username": "app",
+	"Password": "test"
+}'
+*/
 
 func (c *Credentials) Connect() error {
 	if c.db != nil {
@@ -57,12 +88,6 @@ func (c *Credentials) Close() error {
 
 func (c *Credentials) GetDB() *sql.DB {
 	return c.db
-}
-
-type Table struct {
-	Name        string
-	ColumnNames []string
-	Rows        [][]any
 }
 
 func (c *Credentials) QueryTable(tableName string) (*Table, error) {

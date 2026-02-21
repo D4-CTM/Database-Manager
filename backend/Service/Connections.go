@@ -17,31 +17,38 @@ func (c *Connections) close() {
 	}
 }
 
-var Cons Connections
+var (
+	Cons Connections
+	JsonPath string
+)
 
-func SaveConnections(path string) {
+func SaveConnections() {
+	credsPath := path.Join(os.Getenv("CREDS_SUBDIR"), "data.json")
+	log.Printf("[INFO] Saving %d credentials at: %s", len(Cons), credsPath)
 	if len(Cons) == 0 {
+		log.Printf("[WARNING] No credentials to save")
 		return 
 	}
 	Cons.close()
 
-	f, err := os.Create(path)
+	f, err := os.Create(credsPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("[ERROR] %v", err)
+		return 
 	}
 	j := json.NewEncoder(f)
 	j.SetIndent("", "\t")
 
 	if err = j.Encode(Cons); err != nil {
 		log.Printf("[ERROR] %v",err)
+		return 
 	}
-
-	for k := range Cons {
-		delete(Cons, k)
-	}
+	log.Printf("[INFO] Credentials saved")
 }
 
-func LoadConnections(credsPath string) error {
+func LoadConnections() error {
+	credsPath := path.Join(os.Getenv("CREDS_SUBDIR"), "data.json")
+	log.Printf("[INFO] Loading credentials from: %s", credsPath)
 	bytes, err := os.ReadFile(credsPath)
 	if err != nil {
 		Cons = make(Connections)
@@ -58,5 +65,6 @@ func LoadConnections(credsPath string) error {
 		return err
 	}
 
+	log.Printf("[INFO] Credentials loaded: %d", len(Cons))
 	return nil
 }
