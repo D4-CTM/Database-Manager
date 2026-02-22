@@ -22,7 +22,8 @@ func main() {
 	}
 
 	log.Println("Starting server...")
-	r.GET("/Connection", handler.GetConnections)
+	r.GET("/Connection/list", handler.GetConnections)
+	r.GET("/Connection", handler.GetCredential)
 	r.POST("/Connection", handler.PostConnection)
 	r.PUT("/Connection/:oldName", handler.PutConnection)
 
@@ -36,6 +37,8 @@ func main() {
 	r.GET("/Triggers/:database/:schema", handler.Triggers)
 	r.GET("/Indices/:database/:schema", handler.Indexes)
 
+	r.GET("/Select/:database", handler.Select)
+	r.GET("/Exec/:database", handler.Exec)
 	r.GET("/Query/:database", handler.GetTable)
 
 	log.Printf("Server running at: http://localhost%s\n", ADDR)

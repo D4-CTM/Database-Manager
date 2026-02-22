@@ -9,6 +9,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetCredential(c *gin.Context) {
+	conName := c.Query("conName")
+	if conName == "" {
+		abort(c, http.StatusBadRequest, "Please provide a valid Connection Name")
+		return
+	}
+
+	cred := service.Cons[conName]
+
+	c.JSON(http.StatusOK, gin.H{
+		"Credential": cred,
+	})
+}
+
 func GetConnections(c *gin.Context) {
 	cons := make([]string, len(service.Cons))
 	idx := 0
@@ -216,6 +230,57 @@ func Triggers(c *gin.Context) {
 
 func Indexes(c *gin.Context) {
 	fetchData(c, "index_name", "sys.all_indexes", "owner = :1")
+}
+
+
+func Exec(c *gin.Context) {
+	dbName := c.Param("database")
+	query := c.Query("query")
+	if query == "" {
+		abort(c, http.StatusInternalServerError, "Query not specified")
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbConnectionRefused(c, err)
+		return
+	}
+
+	ar, err := cred.Exec(query)
+	if err != nil {
+		internalError(c, err, "Unable to fetch tables")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"AffectedRows": ar,
+	})
+}
+
+func Select(c *gin.Context) {
+	dbName := c.Param("database")
+	query := c.Query("query")
+	if query == "" {
+		abort(c, http.StatusInternalServerError, "Query not specified")
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbConnectionRefused(c, err)
+		return
+	}
+
+	table, err := cred.QueryRows(query)
+	if err != nil {
+		internalError(c, err, "Unable to fetch tables")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"AffectedRows": (*table),
+	})
 }
 
 func GetTable(c *gin.Context) {

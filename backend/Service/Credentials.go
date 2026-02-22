@@ -90,25 +90,58 @@ func (c *Credentials) GetDB() *sql.DB {
 	return c.db
 }
 
-func (c *Credentials) QueryTable(tableName string) (*Table, error) {
+func (c *Credentials) Exec(query string) (int64, error) {
 	db := c.GetDB()
-	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", tableName))
+	result, err := db.Exec(query)
+	if err != nil {
+		return -1, fmt.Errorf("[ERROR] %v\n", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return -1, fmt.Errorf("[ERROR] %v\n", err)
+	}
+
+	return affected, nil
+}
+
+func (c *Credentials) QueryRows(query string) (*Table, error) {
+	rows, err := c.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("[ERROR] %v\n", err)
 	}
 	defer rows.Close()
 
-	cols, err := rows.Columns()
+	var table = Table{}
+	err = fetchRows(rows, &table)
+
+	return &table, err
+}
+
+func (c *Credentials) QueryTable(tableName string) (*Table, error) {
+	rows, err := c.db.Query(fmt.Sprintf("SELECT * FROM %s", tableName))
 	if err != nil {
-		return nil, fmt.Errorf("[WARN] Column couldn't be read!\n\t[ERROR] Error %v", err)
+		return nil, fmt.Errorf("[ERROR] %v\n", err)
 	}
-	colLen := len(cols)
+	defer rows.Close()
 
 	var table = Table{
 		Name:        tableName,
-		ColumnNames: cols,
-		Rows:        [][]any{{}},
 	}
+	err = fetchRows(rows, &table)
+
+	return &table, err
+}
+
+func fetchRows(rows *sql.Rows, table *Table) (error) {
+	cols, err := rows.Columns()
+	if err != nil {
+		return fmt.Errorf("[WARN] Column couldn't be read!\n\t[ERROR] Error %v", err)
+	}
+	colLen := len(cols)
+
+	table.ColumnNames = cols
+	table.Rows = [][]any{{}}
 
 	for rows.Next() {
 		columns := make([]any, colLen)
@@ -118,7 +151,7 @@ func (c *Credentials) QueryTable(tableName string) (*Table, error) {
 		}
 
 		if err := rows.Scan(columnPointers...); err != nil {
-			return nil, fmt.Errorf("[ERROR] %v", err)
+			return fmt.Errorf("[ERROR] %v", err)
 		}
 
 		rowData := make([]any, colLen)
@@ -136,5 +169,5 @@ func (c *Credentials) QueryTable(tableName string) (*Table, error) {
 		fmt.Println()
 	}
 
-	return &table, nil
+	return nil
 }
