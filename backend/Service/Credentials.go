@@ -46,15 +46,6 @@ func CreateCredFromGin(c *gin.Context) Credentials {
 
 }
 
-/*
-'{
-	"Port": 0,
-	"Database": "test",
-	"Username": "app",
-	"Password": "test"
-}'
-*/
-
 func (c *Credentials) Connect() error {
 	if c.db != nil {
 		return nil

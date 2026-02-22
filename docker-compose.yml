@@ -1,15 +1,23 @@
 services:
-#  goapp:
-#    build: 
-#      context: ./backend/
-#      dockerfile: Dockerfile
-#    container_name: dbmt
-#    ports:
-#      - "5461:5461"
-#    environment:
-#      CREDS_SUBDIR: credentials
-#    volumes:
-#      - ./credentials:/usr/src/app/credentials
+  goapp:
+    build: 
+      context: ./backend/
+      dockerfile: Dockerfile
+    container_name: dbmt
+    ports:
+      - "5461:5461"
+    environment:
+      CREDS_SUBDIR: credentials
+    volumes:
+      - ./credentials:/app/credentials/
+
+  frontend:
+    build: 
+      context: ./frontend/
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "4173:4173"
 
   oracle-xe:
     image: gvenzl/oracle-free:23-slim
