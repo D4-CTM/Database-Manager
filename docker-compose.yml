@@ -21,7 +21,7 @@ services:
     ports:
       - "4173:4173"
 
-  oracle-xe:
+  oracle:
     image: gvenzl/oracle-free:23-slim
     container_name: oracle
     ports:
@@ -31,7 +31,7 @@ services:
       APP_USER: appuser 
       APP_USER_PASSWORD: appuser_pass
     volumes:
-      - ./init-scripts:/opt/oracle/scripts/setup
+      - ./init-scripts:/container-entrypoint-startdb.d
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 10s
