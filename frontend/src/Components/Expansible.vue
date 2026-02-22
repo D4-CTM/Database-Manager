@@ -12,13 +12,20 @@ const props = defineProps({
     }
 })
 
+let emit = defineEmits(['beforeExpand'])
+
+function beforeExpand() {
+    emit('beforeExpand')
+    expand.value = !expand.value
+}
+
 let expand = ref(false)
 </script>
 
 <template>
     <li class="my-1 px-2 d-flex flex-column">
         <button class="btn p-0 my-1 text-left btn-light rounded fs-5"
-            :aria-expanded="expand" @click="expand = !expand">
+            :aria-expanded="expand" @click="beforeExpand">
             <i :class="['px-1', 'bi', expand ? 'bi-caret-down-fill' : idleIcon]"/>{{ btnTxt }}
         </button>
         <div v-if="expand" class="d-flex flex-column">

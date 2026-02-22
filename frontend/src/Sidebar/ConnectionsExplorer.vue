@@ -3,14 +3,22 @@ import CreateConnectionModal from './CreateConnectionModal.vue';
 import { DbCredential } from '@/Types/Credential';
 import DatabaseItem from './DatabaseItem.vue';
 import { ref } from 'vue';
-import axios, { AxiosResponse, HttpStatusCode } from 'axios';
-import { ErrorRequest } from '@/Types/ErrorRequest';
+import { Get, PostOrPut } from '@/Helpers/HttpCaller';
 
 let connections = ref([] as string[])
 let credential = ref({} as DbCredential)
 let showModal = ref(false)
 
-const emits = defineEmits(['update:connections:push'])
+async function loadConnections() {
+    try {
+        const data = await Get<string[]>('/api/Connection/list')
+        connections.value = data
+    } catch (ex) {
+        alert(ex)
+    }
+}
+loadConnections()
+
 function closeModal() {
     credential.value = ({} as DbCredential)
     showModal.value = false
@@ -18,22 +26,12 @@ function closeModal() {
 
 async function patchCredential(isNew: boolean) {
     try {
-        let response: AxiosResponse<string> = isNew
-            ? await axios.post<string>('/api/Connection', credential.value)
-            : await axios.put<string>('/api/Connection', credential.value)
-
-        if (response.status === HttpStatusCode.Ok) {
-            connections.value.push(response.data)
-            closeModal()
+        const data = await PostOrPut<string, DbCredential>('/api/Connection', credential.value, isNew)
+        if (isNew) {
+            connections.value.push(data)
         }
     } catch (ex) {
-        if (axios.isAxiosError(ex) && ex.response) {
-            const err = ex.response.data as string 
-            console.error(`Server failed: ${err}`)
-            alert(err)
-        } else {
-            console.error('Network or unknown error', ex)
-        }
+        alert(ex)
     }
 }
 </script>

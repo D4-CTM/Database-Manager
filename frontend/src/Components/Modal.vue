@@ -22,13 +22,7 @@ function close() {
 }
 
 function confirm() {
-    try {
-        emit('onConfirm')
-
-        close()
-    } catch (ex) {
-        alert(ex)
-    }
+    emit('onConfirm')
 }
 
 watch(() => props.modelValue, (val) => {

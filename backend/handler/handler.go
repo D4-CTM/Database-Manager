@@ -113,7 +113,6 @@ func Ping(c *gin.Context) {
 	data := gin.H{
 		"User":     strings.ToUpper(cred.User),
 		"Database": cred.Database,
-		"Key":      dbName,
 	}
 	if !cred.ShowAll {
 		users = append(users, cred.User)

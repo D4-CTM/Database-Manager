@@ -65,7 +65,6 @@ function clear() {
         <div style="flex: 1; overflow: scroll; min-height: 0;">
             <TableRenderer
                 v-show="resultType === ResultType.Table"
-                :editable="false"
                 :data="result as TableData" />
         </div>
     </div>

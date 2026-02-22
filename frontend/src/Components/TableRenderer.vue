@@ -2,8 +2,7 @@
 import { TableData } from '@/Types/TableData';
 
 defineProps<{
-    data: TableData,
-    editable: Boolean
+    data: TableData
 }>()
 </script>
 
