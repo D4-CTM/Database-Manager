@@ -132,7 +132,7 @@ func fetchRows(rows *sql.Rows, table *Table) (error) {
 	colLen := len(cols)
 
 	table.ColumnNames = cols
-	table.Rows = [][]any{{}}
+	table.Rows = [][]any{}
 
 	for rows.Next() {
 		columns := make([]any, colLen)
@@ -154,7 +154,6 @@ func fetchRows(rows *sql.Rows, table *Table) (error) {
 			} else {
 				rowData[i] = val
 			}
-			fmt.Printf("%v ", rowData[i])
 		}
 		table.Rows = append(table.Rows, rowData)
 		fmt.Println()

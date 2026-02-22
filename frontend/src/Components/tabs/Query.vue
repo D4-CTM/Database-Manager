@@ -11,23 +11,7 @@ const enum ResultType {
 
 let query = ref('')
 let resultType = ref(ResultType.Table)
-let result = ref<Number | TableData | null>({
-    Name: 'Test table',
-    ColumnNames: [
-        'Name',
-        'PhoneNumber',
-    ],
-    Rows: [
-        [
-            'Josh',
-            '+504 32312284',
-        ],
-        [
-            'Jennifer',
-            '+1 (XXX) XXXXXX'
-        ]
-    ]
-} as TableData)
+let result = ref<Number | TableData | null>({} as TableData)
 
 function exec() {
     console.log(query.value)

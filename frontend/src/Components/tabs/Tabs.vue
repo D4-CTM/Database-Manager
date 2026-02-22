@@ -1,43 +1,36 @@
 <script setup lang="ts">
-import { TabData, TabOptions } from '@/Types/TabData';
-import { ref } from 'vue';
+import { TabOptions, TabStore } from '@/Types/TabData';
+import { inject } from 'vue';
 import Query from './Query.vue';
+import TableRenderer from '../TableRenderer.vue';
 
-const props = defineProps({
-    tabs: {
-        type: Array<TabData>,
-        required: true
-    },
-})
+let store = inject<TabStore>('TabStore')
 
-const emit = defineEmits(['removeTab'])
-
-let selectedIdx = ref(0)
-
-function removeTab(idx: number) {
-    const old = selectedIdx.value
-    selectedIdx.value = old > 0 ? old - 1 : old
-    emit('removeTab', idx)
+function removeTab(title: string) {
+    if (!store.removeAt(title))
+        alert(`Unable to remove tab ${title}`)
 }
 </script>
 
 <template>
     <div class="d-flex" style="max-height: 100vh;">
         <ul class="nav nav-tabs">
-            <li class="nav-item fs-5 inline" v-for="(tab, idx) in tabs">
-                <div class="nav-link" :class="[selectedIdx == idx ? 'active' : '']">
-                    <a @click="selectedIdx = idx">
+            <li class="nav-item fs-5 inline" v-for="(tab, idx) in store.list()">
+                <div class="nav-link" :class="[store.currentIdx() == idx ? 'active' : '']">
+                    <a @click="store.selectedTab.value = idx">
                         {{ tab.Title }}
                     </a>
                     <button class="btn"
-                        @click="removeTab(idx)">
+                        @click="removeTab(tab.Title)">
                         &times;
                     </button>
                 </div>
             </li>
         </ul>
     </div>
-    <div v-if="tabs.length > 0" class="p-2 border-top w-100">
-        <Query v-show="tabs[selectedIdx].Type === TabOptions.Query" />
+    <div v-if="store.length() > 0" class="p-2 border-top w-100">
+        <Query v-if="store.currentTabType() === TabOptions.Query" />
+        <TableRenderer v-else-if="store.currentTabType() === TabOptions.Table" 
+                       :data="store.currentPayload()" />
     </div>
 </template>

@@ -15,8 +15,11 @@ const props = defineProps({
 let emit = defineEmits(['beforeExpand'])
 
 function beforeExpand() {
-    emit('beforeExpand')
-    expand.value = !expand.value
+    if (!expand.value) {
+        emit('beforeExpand', 
+            () => expand.value = true)
+    }
+    else expand.value = false
 }
 
 let expand = ref(false)

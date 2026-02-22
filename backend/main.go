@@ -39,7 +39,7 @@ func main() {
 
 	r.GET("/api/Select/:database", handler.Select)
 	r.GET("/api/Exec/:database", handler.Exec)
-	r.GET("/api/Query/:database", handler.GetTable)
+	r.GET("/api/Query/Table/:database", handler.GetTable)
 
 	log.Printf("Server running at: http://localhost%s\n", ADDR)
 	if err := r.Run(ADDR); err != nil {

@@ -174,23 +174,20 @@ func fetchData(c *gin.Context, ss string, table string, wc string) {
 
 	db := cred.GetDB()
 	values := []string{}
-	row, err := db.Query(query, strings.ToUpper(schema))
+	rows, err := db.Query(query, strings.ToUpper(schema))
 	if err != nil {
 		tablesError(c, err)
 		return
 	}
-	defer row.Close()
+	defer rows.Close()
+
 	val := ""
-	for row.Next() {
-		row.Scan(&val)
+	for rows.Next() {
+		rows.Scan(&val)
 		values = append(values, val)
 	}
 
-	data := gin.H{}
-	data["data"] = values
-	data["Schema"] = schema
-	data["ConName"] = dbName
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, values)
 }
 
 func Tables(c *gin.Context) {
@@ -202,15 +199,15 @@ func Views(c *gin.Context) {
 }
 
 func Procedures(c *gin.Context) {
-	fetchData(c, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'PROCEDURE'")
+	fetchData(c, "object_name", "sys.all_procedures", "owner = :1 AND object_type = 'PROCEDURE'")
 }
 
 func Functions(c *gin.Context) {
-	fetchData(c, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'FUNCTION'")
+	fetchData(c, "object_name", "sys.all_procedures", "owner = :1 AND object_type = 'FUNCTION'")
 }
 
 func Packages(c *gin.Context) {
-	fetchData(c, "procedure_name", "sys.all_procedures", "owner = :1 AND object_type = 'PACKAGE'")
+	fetchData(c, "object_name", "sys.all_procedures", "owner = :1 AND object_type = 'PACKAGE'")
 }
 
 func Sequences(c *gin.Context) {
@@ -278,13 +275,13 @@ func Select(c *gin.Context) {
 
 func GetTable(c *gin.Context) {
 	dbName := c.Param("database")
-	tableName := c.Query("Table")
+	tableName := c.Query("table")
 	if tableName == "" {
 		abort(c, http.StatusInternalServerError, "Table not specified")
 		return
 	}
 
-	owner := strings.TrimSpace(c.Query("Owner"))
+	owner := strings.TrimSpace(c.Query("owner"))
 	if len(owner) > 0 {
 		tableName = fmt.Sprintf("%s.%s", owner, tableName)
 	}
@@ -301,7 +298,5 @@ func GetTable(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"Table": (*table),
-	})
+	c.JSON(http.StatusOK, (*table))
 }

@@ -18,4 +18,3 @@
 ## Golang ignore
 **/data.json
 **/credentials/
-init-scripts/

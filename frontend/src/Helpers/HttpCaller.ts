@@ -10,6 +10,8 @@ export async function PostOrPut<T, t>(endpoint: string, data: t, isNew: boolean 
         if (response.status === HttpStatusCode.Ok) {
             return response.data
         }
+
+        throw new Error('Unable to patch data')
     } catch (ex) {
         if (axios.isAxiosError(ex) && ex.response) {
             const err = ex.response.data as string 
@@ -28,6 +30,7 @@ export async function Get<T>(endpoint: string) {
         if (response.status === HttpStatusCode.Ok) {
             return response.data
         }
+        throw new Error('Unable to fetch data')
     } catch (ex) {
         if (axios.isAxiosError(ex) && ex.response) {
             const err = ex.response.data as string 
