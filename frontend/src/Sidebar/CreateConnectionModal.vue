@@ -7,11 +7,12 @@ import { computed, ref } from 'vue';
 const props = defineProps<{
     credential: DbCredential
     modelValue: boolean
+    title: string
 }>()
 
 let showPassword = ref(false)
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'onCancel', 'onConfirm'])
 
 const modelProxy = computed({
 get: ()=>props.modelValue,
@@ -24,9 +25,15 @@ const validCredentials = () =>
     props.credential.Password != '' &&
     props.credential.User != '';
 
-function PatchCredentials() {
+function onClose() {
+    emit('onCancel')
+}
+
+function onConfirm() {
     if (!validCredentials())
         throw new Error('Invalid credentials!');
+
+    emit('onConfirm')
 }
 </script>
 
@@ -36,10 +43,11 @@ function PatchCredentials() {
     </button>
 
     <Modal btnTxt="Add credential"
-           title="This is test" 
+           :title="title" 
            v-model="modelProxy"
            :modal-type="ModalType.FORM"
-           @confirm="PatchCredentials">
+           @onClose="onClose"
+           @onConfirm="onConfirm">
         <template #CONTENT>
             <form>
                 <div class="row">

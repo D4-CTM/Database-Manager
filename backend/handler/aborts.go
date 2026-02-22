@@ -7,35 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Error struct {
-	Code     int
-	ErrorMsg string
+func abortErr(c *gin.Context, code int, msg string, err error) {
+	log.Printf("[ERROR] %v", err)
+	c.AbortWithStatusJSON(code, msg)
 }
 
 func abort(c *gin.Context, code int, msg string) {
 	log.Printf("[ERROR] %v", msg)
-	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-		"Error": Error{
-			Code: code,
-			ErrorMsg: msg,
-		},
-	})
+	c.AbortWithStatusJSON(code, msg)
 }
 
-func abortWithError(c *gin.Context, err error, code int, msg string) {
-	log.Printf("[ERROR] %v", err)
-	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-		"Error": Error{
-			Code: code,
-			ErrorMsg: msg,
-		},
-	})
+func internalError(c *gin.Context, msg string, err error) {
+	abortErr(c, http.StatusInternalServerError, msg, err)
 }
 
-func internalError(c *gin.Context, err error, msg string) {
-	abortWithError(c, err, http.StatusInternalServerError, msg)
+func dbRefused(c *gin.Context, err error) {
+	internalError(c, "Unable to stablish database connection", err)
 }
 
-func dbConnectionRefused(c *gin.Context, err error) {
-	abortWithError(c, err, http.StatusInternalServerError, "Unable to connect with database")
+func tablesError(c *gin.Context, err error) {
+	internalError(c, "Unable to fetch tables", err)
 }

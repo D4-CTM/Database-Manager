@@ -10,15 +10,20 @@ const props = defineProps({
     confirmTxt: { type: String, default: 'Save Changes' }
 })
 
-const emit = defineEmits(['update:modelValue', 'confirm'])
+const emit = defineEmits(['update:modelValue', 'onConfirm', 'onClose'])
 
 function close() {
+    try {
+        emit('onClose')
+    } catch (ex) {
+        alert(ex)
+    }
     emit('update:modelValue', false)
 }
 
 function confirm() {
     try {
-        emit('confirm')
+        emit('onConfirm')
 
         close()
     } catch (ex) {

@@ -18,9 +18,7 @@ func GetCredential(c *gin.Context) {
 
 	cred := service.Cons[conName]
 
-	c.JSON(http.StatusOK, gin.H{
-		"Credential": cred,
-	})
+	c.JSON(http.StatusOK, cred)
 }
 
 func GetConnections(c *gin.Context) {
@@ -31,20 +29,18 @@ func GetConnections(c *gin.Context) {
 		idx++
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"Connections": cons,
-	})
+	c.JSON(http.StatusOK, cons)
 }
 
 func PostConnection(c *gin.Context) {
 	cred := service.Credentials{}
 	if err := c.ShouldBind(&cred); err != nil {
-		internalError(c, err, "Unable to bind credential")
+		internalError(c, "Unable to bind credential", err)
 		return
 	}
 
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
@@ -63,9 +59,7 @@ func PostConnection(c *gin.Context) {
 	service.Cons[conName] = cred
 	service.SaveConnections()
 
-	c.JSON(http.StatusOK, gin.H{
-		"Name": conName,
-	})
+	c.JSON(http.StatusOK, conName)
 }
 
 func PutConnection(c *gin.Context) {
@@ -87,12 +81,12 @@ func PutConnection(c *gin.Context) {
 
 	cred := service.Credentials{}
 	if err := c.ShouldBind(&cred); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
@@ -111,7 +105,7 @@ func Ping(c *gin.Context) {
 	dbName := c.Param("database")
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 	users := []string{}
@@ -139,7 +133,7 @@ func Ping(c *gin.Context) {
 	db := cred.GetDB()
 	row, err := db.Query(query)
 	if err != nil {
-		internalError(c, err, "Unable to fetch user table")
+		tablesError(c, err)
 		return
 	}
 
@@ -166,7 +160,7 @@ func fetchData(c *gin.Context, ss string, table string, wc string) {
 	schema := c.Param("schema")
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
@@ -183,7 +177,7 @@ func fetchData(c *gin.Context, ss string, table string, wc string) {
 	values := []string{}
 	row, err := db.Query(query, strings.ToUpper(schema))
 	if err != nil {
-		internalError(c, err, "Unable to fetch tables")
+		tablesError(c, err)
 		return
 	}
 	defer row.Close()
@@ -243,13 +237,13 @@ func Exec(c *gin.Context) {
 
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
 	ar, err := cred.Exec(query)
 	if err != nil {
-		internalError(c, err, "Unable to fetch tables")
+		tablesError(c, err)
 		return
 	}
 
@@ -268,13 +262,13 @@ func Select(c *gin.Context) {
 
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
 	table, err := cred.QueryRows(query)
 	if err != nil {
-		internalError(c, err, "Unable to fetch tables")
+		tablesError(c, err)
 		return
 	}
 
@@ -298,13 +292,13 @@ func GetTable(c *gin.Context) {
 
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
-		dbConnectionRefused(c, err)
+		dbRefused(c, err)
 		return
 	}
 
 	table, err := cred.QueryTable(tableName)
 	if err != nil {
-		internalError(c, err, "Unable to fetch tables")
+		tablesError(c, err)
 		return
 	}
 
