@@ -31,7 +31,7 @@ function PatchCredentials() {
 </script>
 
 <template>
-    <button button class="btn btn-primary" @click="modelProxy = true">
+    <button button class="my-2 py-2 btn btn-primary fs-5" @click="modelProxy = true">
         Add Credential
     </button>
 
