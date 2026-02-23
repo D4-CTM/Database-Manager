@@ -46,7 +46,6 @@ let expand = ref(false)
                 <ul class="dropdown-menu dropdown-menu-end">
                     <slot name="OPTIONS" />
                 </ul>
-
             </div>
         </div>
         <div v-if="expand" class="d-flex flex-column">

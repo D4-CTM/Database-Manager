@@ -21,7 +21,7 @@ let resultType = ref(ResultType.Null)
 let result = ref<Number | TableData | null>({} as TableData)
 
 async function exec() {
-    const upperQuery = query.value.toUpperCase()
+    const upperQuery = query.value.trim().toUpperCase()
     const conn = props.conName.replace(' ', '%20')
 
     if (upperQuery.startsWith('SELECT')) {

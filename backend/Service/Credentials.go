@@ -40,13 +40,12 @@ type ColumnsMetadata struct {
 }
 
 type ConstraintMetadata struct {
-	ConstraintName     string
-	ConstraintType     string
-	ConstraintTypeName string
-	ColumnName         string
-	SearchCondition    string
-	RefConstraint      string
-	Position           int
+	ConstraintName  string
+	ConstraintType  string
+	ColumnName      string
+	SearchCondition string
+	RefConstraint   string
+	Position        int
 }
 
 type FunctionArgument struct {
@@ -235,7 +234,6 @@ func (c *Credentials) QueryTableConstraints(tableName string) ([]ConstraintMetad
 		`
 		SELECT
 			c.constraint_name,
-			c.constraint_type,
 			CASE c.constraint_type
 				WHEN 'P' THEN 'PRIMARY KEY'
 				WHEN 'R' THEN 'FOREIGN KEY'
@@ -264,15 +262,15 @@ func (c *Credentials) QueryTableConstraints(tableName string) ([]ConstraintMetad
 		var c ConstraintMetadata
 		var searchCondition sql.NullString
 		var refConstraint sql.NullString
+		var position sql.NullInt32
 
 		if err := rows.Scan(
 			&c.ConstraintName,
 			&c.ConstraintType,
-			&c.ConstraintTypeName,
 			&c.ColumnName,
 			&searchCondition,
 			&refConstraint,
-			&c.Position,
+			&position,
 		); err != nil {
 			return nil, fmt.Errorf("[ERROR] %v", err)
 		}
@@ -287,6 +285,12 @@ func (c *Credentials) QueryTableConstraints(tableName string) ([]ConstraintMetad
 			c.RefConstraint = refConstraint.String
 		} else {
 			c.RefConstraint = ""
+		}
+
+		if position.Valid {
+			c.Position = int(position.Int32)
+		} else {
+			c.Position = 0
 		}
 
 		constraints = append(constraints, c)

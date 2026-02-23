@@ -1,5 +1,4 @@
 import { ref } from "vue";
-import { TableData } from "./TableData";
 
 export enum TabOptions {
     Table = 0,
@@ -11,7 +10,14 @@ export enum TabOptions {
 export interface TabData {
     Title: string,
     Type: TabOptions,
-    Payload: TableData | string | null
+    conName: string
+    Payload: QueryPayload | null 
+}
+
+export interface QueryPayload {
+    owner: string
+    table: string
+    objectType: string
 }
 
 export class TabStore {
@@ -22,7 +28,8 @@ export class TabStore {
     public readonly length = () => this.tabs.value.length
     public readonly list = () => this.tabs.value
 
-    public readonly currentPayload = <T extends String | TableData>() => this.tabs.value[this.currentIdx()].Payload as T
+    public readonly currentPayload = <T extends QueryPayload>() => this.tabs.value[this.currentIdx()].Payload as T
+    public readonly currentConn = () => this.tabs.value[this.currentIdx()].conName
     public readonly currentTabType = () => this.tabs.value[this.currentIdx()].Type
 
     add(tab: TabData) {
@@ -30,7 +37,7 @@ export class TabStore {
         this.tabs.value.forEach(x => {
             if (x.Title.startsWith(tab.Title)) count++
         })
-       
+
         if (count > 0)
             tab.Title += ` #${count}`
 

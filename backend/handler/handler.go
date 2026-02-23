@@ -361,7 +361,7 @@ func GetTableConstraints(c *gin.Context) {
 		return
 	}
 
-	columns, err := cred.QueryTableColumnsMetadata(gt.Table)
+	columns, err := cred.QueryTableConstraints(gt.Table)
 	if err != nil {
 		internalError(c, "Unable to fetch columns", err)
 		return

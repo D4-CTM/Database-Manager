@@ -2,7 +2,7 @@
 import { TabOptions, TabStore } from '@/Types/TabData';
 import { inject } from 'vue';
 import Query from './Query.vue';
-import TableRenderer from './TableRenderer.vue';
+import TableInformation from './TableInformation.vue';
 
 let store = inject<TabStore>('TabStore')
 
@@ -28,7 +28,7 @@ function removeTab(title: string) {
         </ul>
     </div>
     <div v-if="store.length() > 0" class="p-2 border-top w-100 flex-grow-1 overflow-auto">
-        <Query v-if="store.currentTabType() === TabOptions.Query" :conName="store.currentPayload()" />
-        <TableRenderer v-else-if="store.currentTabType() === TabOptions.Table" :data="store.currentPayload()" />
+        <Query v-if="store.currentTabType() === TabOptions.Query" :conName="store.currentConn()" />
+        <TableInformation v-else-if="store.currentTabType() === TabOptions.Table" :query="store.currentPayload()" :conName="store.currentConn()" />
     </div>
 </template>

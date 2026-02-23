@@ -1,25 +1,25 @@
 services:
-#  goapp:
-#    build: 
-#      context: ./backend/
-#      dockerfile: Dockerfile
-#    container_name: dbmt
-#    ports:
-#      - "5461:5461"
-#    environment:
-#      CREDS_SUBDIR: credentials
-#    volumes:
-#      - ./credentials:/app/credentials/
-#
-#  frontend:
-#    build: 
-#      context: ./frontend/
-#      dockerfile: Dockerfile
-#    container_name: frontend
-#    environment:
-#      - ENDPOINT: 'http://localhost:5461'
-#    ports:
-#      - "4173:4173"
+  goapp:
+    build: 
+      context: ./backend/
+      dockerfile: Dockerfile
+    container_name: dbmt
+    ports:
+      - "5461:5461"
+    environment:
+      CREDS_SUBDIR: credentials
+    volumes:
+      - ./credentials:/app/credentials/
+
+  frontend:
+    build: 
+      context: ./frontend/
+      dockerfile: Dockerfile
+    container_name: frontend
+    environment:
+      - ENDPOINT: 'http://localhost:5461'
+    ports:
+      - "4173:4173"
 
   oracle:
     image: gvenzl/oracle-free:23-slim

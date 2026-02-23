@@ -2,8 +2,7 @@
 import Expandible from '@/Components/Expandible.vue';
 import { Get } from '@/Helpers/HttpCaller';
 import { Options } from '@/Types/Options';
-import { TabData, TabOptions, TabStore } from '@/Types/TabData';
-import { TableData } from '@/Types/TableData';
+import { QueryPayload, TabData, TabOptions, TabStore } from '@/Types/TabData';
 import { inject, ref } from 'vue';
 const props = defineProps({
     schema: {
@@ -32,12 +31,15 @@ async function fetchData(opt: string) {
     try {
         const table = opt.replace(' ', '%20')
         const schema = props.schema.replace(' ', '%20')
-        const result = await Get<TableData>(`/api/Query/Table/${props.conName}?table=${table}&owner=${schema}`)
 
         const tab: TabData = {
             Title: opt,
             Type: TabOptions.Table,
-            Payload: result
+            conName: props.conName,
+            Payload: {
+                table: table,
+                owner: schema
+            } as QueryPayload
         }
 
         store.add(tab)

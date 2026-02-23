@@ -38,7 +38,7 @@ function openSqlEditor() {
     store.add({
         Title: `${conn}.sql`,
         Type: TabOptions.Query,
-        Payload: conn
+        conName: conn
     } as TabData)
 }
 </script>
