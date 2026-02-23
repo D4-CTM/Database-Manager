@@ -2,7 +2,7 @@
 import { TabOptions, TabStore } from '@/Types/TabData';
 import { inject } from 'vue';
 import Query from './Query.vue';
-import TableRenderer from '../TableRenderer.vue';
+import TableRenderer from './TableRenderer.vue';
 
 let store = inject<TabStore>('TabStore')
 
@@ -13,24 +13,22 @@ function removeTab(title: string) {
 </script>
 
 <template>
-    <div class="d-flex" style="max-height: 100vh;">
+    <div class="d-flex flex-column w-100">
         <ul class="nav nav-tabs">
             <li class="nav-item fs-5 inline" v-for="(tab, idx) in store.list()">
                 <div class="nav-link" :class="[store.currentIdx() == idx ? 'active' : '']">
                     <a @click="store.selectedTab.value = idx">
                         {{ tab.Title }}
                     </a>
-                    <button class="btn"
-                        @click="removeTab(tab.Title)">
+                    <button class="btn" @click="removeTab(tab.Title)">
                         &times;
                     </button>
                 </div>
             </li>
         </ul>
     </div>
-    <div v-if="store.length() > 0" class="p-2 border-top w-100">
-        <Query v-if="store.currentTabType() === TabOptions.Query" />
-        <TableRenderer v-else-if="store.currentTabType() === TabOptions.Table" 
-                       :data="store.currentPayload()" />
+    <div v-if="store.length() > 0" class="p-2 border-top w-100 flex-grow-1 overflow-auto">
+        <Query v-if="store.currentTabType() === TabOptions.Query" :conName="store.currentPayload()" />
+        <TableRenderer v-else-if="store.currentTabType() === TabOptions.Table" :data="store.currentPayload()" />
     </div>
 </template>

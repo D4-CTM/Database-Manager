@@ -9,12 +9,13 @@ import (
 
 type Connections map[string]Credentials
 
-func (c *Connections) close() {
+func (c *Connections) Close() {
 	for n, c := range Cons {
 		if err := c.Close(); err != nil {
 			log.Printf("[ERROR] %s: %v", n, err)
 		}
 	}
+	log.Println("\n[INFO] Connections closed")
 }
 
 var (
@@ -26,10 +27,8 @@ func SaveConnections() {
 	credsPath := path.Join(os.Getenv("CREDS_SUBDIR"), "data.json")
 	log.Printf("[INFO] Saving %d credentials at: %s", len(Cons), credsPath)
 	if len(Cons) == 0 {
-		log.Printf("[WARNING] No credentials to save")
-		return 
+		log.Printf("[WARNING] Credentials map is empty")
 	}
-	Cons.close()
 
 	f, err := os.Create(credsPath)
 	if err != nil {

@@ -21,6 +21,10 @@ func internalError(c *gin.Context, msg string, err error) {
 	abortErr(c, http.StatusInternalServerError, msg, err)
 }
 
+func unableToBind(c *gin.Context, err error) {
+	abortErr(c, http.StatusInternalServerError, "Unable to bind data", err)
+}
+
 func dbRefused(c *gin.Context, err error) {
 	internalError(c, "Unable to stablish database connection", err)
 }

@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"dbmt/Service"
 	"dbmt/handler"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +31,7 @@ func main() {
 	r.GET("/api/Connection", handler.GetCredential)
 	r.POST("/api/Connection", handler.PostConnection)
 	r.PUT("/api/Connection/:oldName", handler.PutConnection)
+	r.DELETE("/api/Connection/:conName", handler.DeleteConnection)
 
 	r.GET("/api/Ping/:database", handler.Ping)
 	r.GET("/api/Tables/:database/:schema", handler.Tables)
@@ -37,12 +43,22 @@ func main() {
 	r.GET("/api/Triggers/:database/:schema", handler.Triggers)
 	r.GET("/api/Indices/:database/:schema", handler.Indexes)
 
-	r.GET("/api/Select/:database", handler.Select)
-	r.GET("/api/Exec/:database", handler.Exec)
+	r.POST("/api/Select/:database", handler.Select)
+	r.PUT("/api/Exec/:database", handler.Exec)
 	r.GET("/api/Query/Table/:database", handler.GetTable)
 
-	log.Printf("Server running at: http://localhost%s\n", ADDR)
-	if err := r.Run(ADDR); err != nil {
-		log.Fatalf("HTTP server error: %v", err)
-	}
+	go func() {
+		log.Printf("Server running at: http://localhost%s\n", ADDR)
+		if err := r.Run(ADDR); err != nil {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	_, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+	service.Cons.Close()
 }

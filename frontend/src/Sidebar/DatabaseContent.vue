@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Expansible from '@/Components/Expansible.vue';
+import Expandible from '@/Components/Expandible.vue';
 import { Get } from '@/Helpers/HttpCaller';
 import { Options } from '@/Types/Options';
 import { TabData, TabOptions, TabStore } from '@/Types/TabData';
@@ -48,7 +48,7 @@ async function fetchData(opt: string) {
 </script>
 
 <template>
-    <Expansible v-for="(icon, name) in Options" @beforeExpand="(expand: Function) => fetchContent(expand, name)"
+    <Expandible v-for="(icon, name) in Options" @beforeExpand="(expand: Function) => fetchContent(expand, name)"
         :btn-txt="name" :idle-icon="icon">
         <template #CONTENT>
             <button class="btn btn-light my-1 mx-2" v-for="val in content[`${conName}:${name}`]"
@@ -56,5 +56,5 @@ async function fetchData(opt: string) {
                 <i class="bi bi-box mx-1" />{{ val }}
             </button>
         </template>
-    </Expansible>
+    </Expandible>
 </template>

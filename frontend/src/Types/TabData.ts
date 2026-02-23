@@ -6,10 +6,12 @@ export enum TabOptions {
     Query = 10,
 }
 
+// When TabOption is a Query the payload is a string
+// when is a Table the payload is TableData
 export interface TabData {
     Title: string,
     Type: TabOptions,
-    Payload: TableData | null
+    Payload: TableData | string | null
 }
 
 export class TabStore {
@@ -20,7 +22,7 @@ export class TabStore {
     public readonly length = () => this.tabs.value.length
     public readonly list = () => this.tabs.value
 
-    public readonly currentPayload = () => this.tabs.value[this.currentIdx()].Payload
+    public readonly currentPayload = <T extends String | TableData>() => this.tabs.value[this.currentIdx()].Payload as T
     public readonly currentTabType = () => this.tabs.value[this.currentIdx()].Type
 
     add(tab: TabData) {

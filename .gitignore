@@ -18,3 +18,5 @@
 ## Golang ignore
 **/data.json
 **/credentials/
+
+**/*.bak

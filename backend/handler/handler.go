@@ -2,7 +2,9 @@ package handler
 
 import (
 	"dbmt/Service"
+	dtos "dbmt/handler/Dtos"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -72,7 +74,7 @@ func PutConnection(c *gin.Context) {
 
 	if conName != oldName {
 		for name := range service.Cons {
-			if name == conName {
+			if name == conName && name != oldName {
 				abort(c, http.StatusInternalServerError, "Connection name already exists")
 				return
 			}
@@ -97,8 +99,21 @@ func PutConnection(c *gin.Context) {
 	service.SaveConnections()
 
 	c.JSON(http.StatusOK, gin.H{
-		"Name": conName,
+		"OldName": oldName,
+		"NewName": conName, 
 	})
+}
+
+func DeleteConnection(c *gin.Context) {
+	conName := c.Param("conName")
+	con := service.Cons[conName]
+	if err := con.Close(); err != nil {
+		log.Printf("[ERROR] %v", err)
+	}
+
+	delete(service.Cons, conName)
+	service.SaveConnections()
+	c.Status(http.StatusNoContent)
 }
 
 func Ping(c *gin.Context) {
@@ -225,11 +240,12 @@ func Indexes(c *gin.Context) {
 
 func Exec(c *gin.Context) {
 	dbName := c.Param("database")
-	query := c.Query("query")
-	if query == "" {
-		abort(c, http.StatusInternalServerError, "Query not specified")
+	data, err := c.GetRawData()
+	if err != nil {
+		internalError(c, "Unable to get raw data", err)
 		return
 	}
+	query := string(data)
 
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
@@ -243,18 +259,17 @@ func Exec(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"AffectedRows": ar,
-	})
+	c.JSON(http.StatusOK, ar)
 }
 
 func Select(c *gin.Context) {
 	dbName := c.Param("database")
-	query := c.Query("query")
-	if query == "" {
-		abort(c, http.StatusInternalServerError, "Query not specified")
+	data, err := c.GetRawData()
+	if err != nil {
+		internalError(c, "Unable to get raw data", err)
 		return
 	}
+	query := string(data)
 
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {
@@ -268,23 +283,22 @@ func Select(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"AffectedRows": (*table),
-	})
+	c.JSON(http.StatusOK, (*table))
 }
 
 func GetTable(c *gin.Context) {
-	dbName := c.Param("database")
-	tableName := c.Query("table")
-	if tableName == "" {
-		abort(c, http.StatusInternalServerError, "Table not specified")
-		return
+	dbName := c.Param("database")	
+	gt := dtos.GetTableDto()
+	err := c.ShouldBindQuery(&gt)
+	if err != nil {
+		unableToBind(c, err)
 	}
 
-	owner := strings.TrimSpace(c.Query("owner"))
-	if len(owner) > 0 {
-		tableName = fmt.Sprintf("%s.%s", owner, tableName)
+	if err = gt.IsValid(); err != nil {
+		internalError(c, err.Error(), err)
+		return
 	}
+	tableName := gt.TableName()
 
 	cred := service.Cons[dbName]
 	if err := cred.Ping(); err != nil {

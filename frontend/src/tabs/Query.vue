@@ -1,26 +1,35 @@
 <script setup lang="ts">
 import { TableData } from '@/Types/TableData';
 import { ref } from 'vue';
-import TableRenderer from '../TableRenderer.vue';
-const NumberType = 'number'
+import TableRenderer from './TableRenderer.vue';
+import { Post, Put } from '@/Helpers/HttpCaller';
 const enum ResultType {
     Null = 0,
     Number = 1,
     Table = 2
 }
 
+const props = defineProps({
+    conName: {
+        type: String,
+        required: true
+    }
+})
+
 let query = ref('')
-let resultType = ref(ResultType.Table)
+let resultType = ref(ResultType.Null)
 let result = ref<Number | TableData | null>({} as TableData)
 
-function exec() {
-    console.log(query.value)
-    if (result.value === null) { 
-        resultType.value = ResultType.Null
-    } else if ((typeof result.value) === NumberType) {
-        resultType.value = ResultType.Number
-    } else {
+async function exec() {
+    const upperQuery = query.value.toUpperCase()
+    const conn = props.conName.replace(' ', '%20')
+
+    if (upperQuery.startsWith('SELECT')) {
         resultType.value = ResultType.Table
+        result.value = await Post<TableData, string>(`/api/Select/${conn}`, upperQuery)
+    } else {
+        resultType.value = ResultType.Number
+        result.value = await Put<Number, string>(`/api/Exec/${conn}`, upperQuery)
     }
 }
 
@@ -41,15 +50,14 @@ function clear() {
         </nav>
         <div class="mb-3">
             <label for="queryArea" class="form-label">Query to execute</label>
-            <textarea v-model="query" class="form-control overflow-scroll" id="queryArea" style="max-height: 40vh;" rows="5"></textarea>
+            <textarea v-model="query" class="form-control" wrap="hard" id="queryArea" style="max-height: 40vh;" rows="5"></textarea>
         </div>
         <div v-show='resultType === ResultType.Number'>
             <input type="text" disabled="true" class="form-control" :value="`Affected rows: ${result}`" />
         </div>
-        <div style="flex: 1; overflow: scroll; min-height: 0;">
-            <TableRenderer
-                v-show="resultType === ResultType.Table"
-                :data="result as TableData" />
+        <div v-show="resultType === ResultType.Table" 
+             style="flex: auto; overflow: auto; min-height: 0;">
+            <TableRenderer :data="result as TableData" />
         </div>
     </div>
 </template>

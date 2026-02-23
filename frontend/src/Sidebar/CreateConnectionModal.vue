@@ -2,7 +2,7 @@
 import { ModalType } from '@/Types/ModalType';
 import Modal from '@/Components/Modal.vue';
 import { DbCredential } from '@/Types/Credential'
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     credential: DbCredential
@@ -11,12 +11,17 @@ const props = defineProps<{
 }>()
 
 let showPassword = ref(false)
+let conName = ref<String>('')
 
-const emit = defineEmits(['update:modelValue', 'onCancel', 'onConfirm'])
+const emit = defineEmits(['update:modelValue', 'update:conName', 'onCancel', 'onConfirm'])
 
 const modelProxy = computed({
 get: ()=>props.modelValue,
 set: (val: boolean) => emit('update:modelValue', val)
+})
+
+watch(() => props.credential.conName, () => {
+    conName.value = props.credential.conName
 })
 
 const validCredentials = () =>
@@ -33,7 +38,10 @@ function onConfirm() {
     if (!validCredentials())
         throw new Error('Invalid credentials!');
 
-    emit('onConfirm')
+    if (!props.credential.isNew && conName.value.trim() == "")
+        throw new Error('Connection name is required!')
+
+    emit('onConfirm', conName.value)
 }
 </script>
 
@@ -62,6 +70,10 @@ function onConfirm() {
                     </div>
                 </div>
                 <div class="mb-3">
+                    <label for="serverInput" class="form-label">Server</label>
+                    <input type="text" v-model.trim="credential.Server" class="form-control" id="serverInput">
+                </div>
+                <div class="mb-3">
                     <label for="usernameInput" class="form-label">User</label>
                     <input type="text" v-model.trim="credential.User" class="form-control" id="usernameInput">
                 </div>
@@ -74,6 +86,10 @@ function onConfirm() {
                             <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                         </button>
                     </div>
+                </div>
+                <div v-if="!credential.isNew" class="mb-3">
+                    <label for="connectionNameInput" class="form-label">Connection Name</label>
+                    <input type="text" v-model.trim="conName" class="form-control" id="connectionNameInput">
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" v-model="credential.ShowAll" class="form-check-input" id="showAllInput">
