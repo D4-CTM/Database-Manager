@@ -34,14 +34,30 @@ async function fetchData(opt: string, name: string) {
 
         let tabType: TabOptions
         switch (name) {
-            case 'Tables': {
+            case 'Tables':
                 tabType = TabOptions.Tables
-            }
             break
-            case 'Views': {
+            case 'Views':
                 tabType = TabOptions.Views
-            }
             break;
+            case 'Procedures':
+                tabType = TabOptions.Procedure
+            break
+            case 'Functions':
+                tabType = TabOptions.Functions
+            break
+            case 'Packages':
+                tabType = TabOptions.Package
+            break
+            case 'Sequences':
+                tabType = TabOptions.Sequence
+            break
+            case 'Triggers':
+                tabType = TabOptions.Trigger
+            break
+            case 'Indices':
+                tabType = TabOptions.Index
+            break
         }
         
         console.log(tabType)

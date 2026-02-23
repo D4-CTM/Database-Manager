@@ -44,10 +44,14 @@ export class TabStore {
             case TabOptions.Tables: return ['Data', 'Columns', 'Constraints','DDL']
             case TabOptions.Views: return ['Data', 'Columns','DDL']
             case TabOptions.Functions:
-            case TabOptions.Package:
             case TabOptions.Procedure:
                 return [ 'Arguments', 'DDL' ]
-            default: [ 'DDL' ]
+            case TabOptions.Package:
+                return [ 'Body', 'DDL' ]
+            case TabOptions.Index:
+            case TabOptions.Sequence:
+            case TabOptions.Trigger: return [ 'DDL' ]
+            case TabOptions.Query: return [ '' ]
         }
     }
 

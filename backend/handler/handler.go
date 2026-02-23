@@ -398,6 +398,34 @@ func GetFunctionArguments(c *gin.Context) {
 	c.JSON(http.StatusOK, columns)
 }
 
+func GetPackageBody(c *gin.Context) {
+	dbName := c.Param("database")
+	gf := dtos.GetFunctionArgs()
+	err := c.ShouldBindQuery(&gf)
+	if err != nil {
+		unableToBind(c, err)
+	}
+
+	if err = gf.IsValid(); err != nil {
+		internalError(c, err.Error(), err)
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbRefused(c, err)
+		return
+	}
+
+	columns, err := cred.QueryPackageBody(gf.Owner, gf.ObjectName)
+	if err != nil {
+		internalError(c, "Unable to fetch package body", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, columns)
+}
+
 func GetDdl(c *gin.Context) {
 	dbName := c.Param("database")
 	gd := dtos.GetDdlDto()

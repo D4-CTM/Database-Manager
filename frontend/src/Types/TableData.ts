@@ -28,8 +28,6 @@ export interface FunctionArgument {
     Position: number
     DataType: string
     InOut: string
-    Length: number
-    Precision: number
-    Scale: number
+    Detail: string
     HasDefault: boolean
 }

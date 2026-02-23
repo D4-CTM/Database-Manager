@@ -49,6 +49,7 @@ func main() {
 	r.GET("/api/Query/Columns/:database", handler.GetTableColumnMetadata)
 	r.GET("/api/Query/Constraints/:database", handler.GetTableConstraints)
 	r.GET("/api/Query/Function/Arguments/:database", handler.GetFunctionArguments)
+	r.GET("/api/Query/Package/Body/:database", handler.GetPackageBody)
 	r.GET("/api/Query/DDL/:database", handler.GetDdl)
 
 	go func() {

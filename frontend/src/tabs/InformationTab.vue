@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import TableRenderer from './TableRenderer.vue';
-import { ColumnsMetadata, ConstraintMetadata, TableData } from '@/Types/TableData';
+import { ColumnsMetadata, ConstraintMetadata, FunctionArgument, TableData } from '@/Types/TableData';
 import { Get } from '@/Helpers/HttpCaller';
 import { QueryPayload } from '@/Types/TabData';
 const prop = defineProps<{
@@ -13,7 +13,7 @@ const prop = defineProps<{
 
 let ddl = ref<string>('')
 let table = ref({
-    Name: prop.options[0]
+    Name: ''
 } as TableData)
 
 console.log(prop.conName)
@@ -40,6 +40,18 @@ async function fillTable(opt: string) {
 
                 table.value = conToTableData(result)
             } break
+            case 'Arguments': {
+                const result =
+                    await Get<FunctionArgument[]>(`/api/Query/Function/Arguments/${prop.conName}?ObjectName=${qd.table}&Owner=${qd.owner}`)
+
+                table.value = argToTableData(result)
+            } break
+            case 'Body': {
+                const result =
+                    await Get<string[]>(`/api/Query/Package/Body/${prop.conName}?ObjectName=${qd.table}&Owner=${qd.owner}`)
+
+                fetchedDdl = result[0]
+            }
             case 'DDL': {
                 const result =
                     await Get<string>(`/api/Query/DDL/${prop.conName}?Type=${prop.conType}&Name=${qd.table}&Owner=${qd.owner}`)
@@ -101,6 +113,29 @@ function colToTableData(col: ColumnsMetadata[]) {
             'IsNullable',
             'IsIdentity',
             'OrdPosition'
+        ],
+        Rows: rows
+    } as TableData
+}
+
+function argToTableData(args: FunctionArgument[]) {
+    let rows: string[][] = []
+    args.forEach(x => rows.push([
+        x.Name,
+        x.Position.toString(),
+        x.DataType,
+        x.InOut,
+        x.Detail,
+        x.HasDefault ? '[X]' : '[ ]',
+    ]))
+    return {
+        ColumnNames: [
+            'Name',
+            'Position',
+            'DataType',
+            'InOut',
+            'Detail',
+            'HasDefault',
         ],
         Rows: rows
     } as TableData

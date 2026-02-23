@@ -53,9 +53,7 @@ type FunctionArgument struct {
 	Position   int
 	DataType   string
 	InOut      string
-	Length     int
-	Precision  int
-	Scale      int
+	Detail     string
 	HasDefault bool
 }
 
@@ -343,9 +341,7 @@ func (c *Credentials) QueryFunctionArguments(owner string, name string) ([]Funct
 			&arg.Position,
 			&arg.DataType,
 			&arg.InOut,
-			&arg.Length,
-			&arg.Precision,
-			&arg.Scale,
+			&arg.Detail,
 			&hasDefaultInt,
 		); err != nil {
 			return nil, fmt.Errorf("[ERROR] %w", err)
@@ -360,6 +356,36 @@ func (c *Credentials) QueryFunctionArguments(owner string, name string) ([]Funct
 	}
 
 	return args, nil
+}
+
+func (c *Credentials) QueryPackageBody(owner string, name string) ([]string, error) {
+	rows, err := c.db.Query(
+		`
+		SELECT LISTAGG(text, '') WITHIN GROUP (ORDER BY line) AS source_code
+		FROM ALL_SOURCE 
+		WHERE NAME = :1 AND OWNER = :2 AND TYPE = 'PACKAGE BODY'
+		GROUP BY owner, name, type;
+		`, name, owner)
+	if err != nil {
+		return nil, fmt.Errorf("[ERROR]: %w", err)
+	}
+	defer rows.Close()
+
+	var bodies []string
+	for rows.Next() {
+		var body  string
+		if err := rows.Scan(&body); err != nil {
+			return nil, fmt.Errorf("[ERROR] %w", err)
+		}
+
+		bodies = append(bodies, body)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("[ERROR] %w", err)
+	}
+
+	return bodies, nil
 }
 
 func (c *Credentials) QueryDDL(objectType string, objectName string, owner string) (string, error) {
