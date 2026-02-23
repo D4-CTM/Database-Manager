@@ -46,6 +46,10 @@ func main() {
 	r.POST("/api/Select/:database", handler.Select)
 	r.PUT("/api/Exec/:database", handler.Exec)
 	r.GET("/api/Query/Table/:database", handler.GetTable)
+	r.GET("/api/Query/Columns/:database", handler.GetTableColumnMetadata)
+	r.GET("/api/Query/Constraints/:database", handler.GetTableConstraints)
+	r.GET("/api/Query/Function/Arguments/:database", handler.GetFunctionArguments)
+	r.GET("/api/Query/DDL/:database", handler.GetDdl)
 
 	go func() {
 		log.Printf("Server running at: http://localhost%s\n", ADDR)

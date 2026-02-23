@@ -100,7 +100,7 @@ func PutConnection(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"OldName": oldName,
-		"NewName": conName, 
+		"NewName": conName,
 	})
 }
 
@@ -237,7 +237,6 @@ func Indexes(c *gin.Context) {
 	fetchData(c, "index_name", "sys.all_indexes", "owner = :1")
 }
 
-
 func Exec(c *gin.Context) {
 	dbName := c.Param("database")
 	data, err := c.GetRawData()
@@ -287,7 +286,7 @@ func Select(c *gin.Context) {
 }
 
 func GetTable(c *gin.Context) {
-	dbName := c.Param("database")	
+	dbName := c.Param("database")
 	gt := dtos.GetTableDto()
 	err := c.ShouldBindQuery(&gt)
 	if err != nil {
@@ -313,4 +312,116 @@ func GetTable(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, (*table))
+}
+
+func GetTableColumnMetadata(c *gin.Context) {
+	dbName := c.Param("database")
+	gt := dtos.GetTableDto()
+	err := c.ShouldBindQuery(&gt)
+	if err != nil {
+		unableToBind(c, err)
+	}
+
+	if err = gt.IsValid(); err != nil {
+		internalError(c, err.Error(), err)
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbRefused(c, err)
+		return
+	}
+
+	columns, err := cred.QueryTableColumnsMetadata(gt.Table)
+	if err != nil {
+		internalError(c, "Unable to fetch columns", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, columns)
+}
+
+func GetTableConstraints(c *gin.Context) {
+	dbName := c.Param("database")
+	gt := dtos.GetTableDto()
+	err := c.ShouldBindQuery(&gt)
+	if err != nil {
+		unableToBind(c, err)
+	}
+
+	if err = gt.IsValid(); err != nil {
+		internalError(c, err.Error(), err)
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbRefused(c, err)
+		return
+	}
+
+	columns, err := cred.QueryTableColumnsMetadata(gt.Table)
+	if err != nil {
+		internalError(c, "Unable to fetch columns", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, columns)
+}
+
+func GetFunctionArguments(c *gin.Context) {
+	dbName := c.Param("database")
+	gf := dtos.GetFunctionArgs()
+	err := c.ShouldBindQuery(&gf)
+	if err != nil {
+		unableToBind(c, err)
+	}
+
+	if err = gf.IsValid(); err != nil {
+		internalError(c, err.Error(), err)
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbRefused(c, err)
+		return
+	}
+
+	columns, err := cred.QueryFunctionArguments(gf.Owner, gf.ObjectName)
+	if err != nil {
+		internalError(c, "Unable to fetch function arguments", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, columns)
+}
+
+func GetDdl(c *gin.Context) {
+	dbName := c.Param("database")
+	gd := dtos.GetDdlDto()
+	err := c.ShouldBindQuery(&gd)
+	if err != nil {
+		unableToBind(c, err)
+	}
+
+	if err = gd.IsValid(); err != nil {
+		internalError(c, err.Error(), err)
+		return
+	}
+
+	cred := service.Cons[dbName]
+	if err := cred.Ping(); err != nil {
+		dbRefused(c, err)
+		return
+	}
+
+	columns, err := cred.QueryDDL(gd.Type, gd.Name, gd.Owner)
+	if err != nil {
+		internalError(c, "Unable to fetch ddl", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, columns)
 }
