@@ -7,48 +7,56 @@ import { QueryPayload } from '@/Types/TabData';
 const prop = defineProps<{
     conName: String,
     query: QueryPayload
+    options: string[]
+    conType: string
 }>()
 
-const options = [
-    'Table',
-    'Columns',
-    'Constraints'
-]
+let ddl = ref<string>('')
 let table = ref({
-    Name: options[0]
+    Name: prop.options[0]
 } as TableData)
 
-async function fillTable(idx: number) {
+console.log(prop.conName)
+async function fillTable(opt: string) {
     const qd = prop.query
+    let fetchedDdl = ''
     try {
-        switch (idx) {
-            case 0: {
+        switch (opt) {
+            case 'Data': {
                 const result =
                     await Get<TableData>(`/api/Query/Table/${prop.conName}?Table=${qd.table}&Owner=${qd.owner}`)
 
                 table.value = result
             } break
-            case 1: {
+            case 'Columns': {
                 const result =
                     await Get<ColumnsMetadata[]>(`/api/Query/Columns/${prop.conName}?Table=${qd.table}&Owner=${qd.owner}`)
                 
                 table.value = colToTableData(result)
             } break
-            case 2: {
+            case 'Constraints': {
                 const result =
                     await Get<ConstraintMetadata[]>(`/api/Query/Constraints/${prop.conName}?Table=${qd.table}&Owner=${qd.owner}`)
 
                 table.value = conToTableData(result)
             } break
+            case 'DDL': {
+                const result =
+                    await Get<string>(`/api/Query/DDL/${prop.conName}?Type=${prop.conType}&Name=${qd.table}&Owner=${qd.owner}`)
+
+                fetchedDdl = result
+            }
+            break
         }
     } catch (ex) {
         alert(ex)
         console.log(ex)
     }
 
-    table.value.Name = options[idx]
+    ddl.value = fetchedDdl
+    table.value.Name = opt
 }
-fillTable(0)
+fillTable(prop.options[0])
 
 function conToTableData(col: ConstraintMetadata[]) {
     let rows: string[][] = []
@@ -102,9 +110,9 @@ function colToTableData(col: ColumnsMetadata[]) {
 <template>
     <div class="d-flex flex-column w-100">
         <ul class="nav nav-tabs">
-            <li class="nav-item fs-6 inline" v-for="(tab, idx) in options">
+            <li class="nav-item fs-6 inline" v-for="tab in options">
                 <div class="nav-link" :class="[table.Name == tab ? 'active' : '']">
-                    <a @click="fillTable(idx)">
+                    <a @click="fillTable(tab)">
                         {{ tab }}
                     </a>
                 </div>
@@ -112,6 +120,10 @@ function colToTableData(col: ColumnsMetadata[]) {
         </ul>
     </div>
     <div class="p-2 border-top w-100 flex-grow-1 overflow-auto">
-        <TableRenderer :data="table" />
+        <TableRenderer v-if="ddl === ''" :data="table" />
+        <div v-if="ddl !== ''" class="mb-3 flex">
+            <label for="ddlArea" class="form-label">{{ query.table }} DDL</label>
+            <textarea class="form-control flex h-100" wrap="hard" id="ddlArea" rows="25" disabled="true">{{ ddl }}</textarea>
+        </div>
     </div>
 </template>

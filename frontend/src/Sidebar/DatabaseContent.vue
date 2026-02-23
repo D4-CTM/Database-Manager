@@ -27,14 +27,27 @@ async function fetchContent(expand: Function, opt: string) {
     }
 }
 
-async function fetchData(opt: string) {
+async function fetchData(opt: string, name: string) {
     try {
         const table = opt.replace(' ', '%20')
         const schema = props.schema.replace(' ', '%20')
 
+        let tabType: TabOptions
+        switch (name) {
+            case 'Tables': {
+                tabType = TabOptions.Tables
+            }
+            break
+            case 'Views': {
+                tabType = TabOptions.Views
+            }
+            break;
+        }
+        
+        console.log(tabType)
         const tab: TabData = {
             Title: opt,
-            Type: TabOptions.Table,
+            Type: tabType,
             conName: props.conName,
             Payload: {
                 table: table,
@@ -54,7 +67,7 @@ async function fetchData(opt: string) {
         :btn-txt="name" :idle-icon="icon">
         <template #CONTENT>
             <button class="btn btn-light my-1 mx-2" v-for="val in content[`${conName}:${name}`]"
-                    @click="fetchData(val)">
+                    @click="fetchData(val, name)">
                 <i class="bi bi-box mx-1" />{{ val }}
             </button>
         </template>

@@ -1,8 +1,16 @@
+import { Tab } from "bootstrap";
 import { ref } from "vue";
 
 export enum TabOptions {
-    Table = 0,
-    Query = 10,
+	Tables = "TABLE",
+	Views = "VIEW",
+	Index = "INDEX",
+	Sequence = "SEQUENCE",
+	Trigger = "TRIGGER",
+	Functions = "FUNCTION",
+	Procedure = "PROCEDURE",
+	Package = "PACKAGE",
+    Query = 'Query',
 }
 
 // When TabOption is a Query the payload is a string
@@ -31,6 +39,17 @@ export class TabStore {
     public readonly currentPayload = <T extends QueryPayload>() => this.tabs.value[this.currentIdx()].Payload as T
     public readonly currentConn = () => this.tabs.value[this.currentIdx()].conName
     public readonly currentTabType = () => this.tabs.value[this.currentIdx()].Type
+    public readonly tabOptions = () => {
+        switch (this.currentTabType()) {
+            case TabOptions.Tables: return ['Data', 'Columns', 'Constraints','DDL']
+            case TabOptions.Views: return ['Data', 'Columns','DDL']
+            case TabOptions.Functions:
+            case TabOptions.Package:
+            case TabOptions.Procedure:
+                return [ 'Arguments', 'DDL' ]
+            default: [ 'DDL' ]
+        }
+    }
 
     add(tab: TabData) {
         let count = 0
