@@ -32,6 +32,7 @@ async function openModal(conName: string) {
 
 function closeModal() {
     credential.value = ({} as DbCredential)
+    credential.value.isNew = true;
     showModal.value = false
 }
 

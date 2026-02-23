@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     environment:
-      ENDPOINT: http://localhost:5461
+      ENDPOINT: http://goapp:5461
     ports:
       - "4173:4173"
 

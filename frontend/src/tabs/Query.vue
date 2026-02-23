@@ -21,15 +21,19 @@ let resultType = ref(ResultType.Null)
 let result = ref<Number | TableData | null>({} as TableData)
 
 async function exec() {
-    const upperQuery = query.value.trim().toUpperCase()
-    const conn = props.conName.replace(' ', '%20')
+    try {
+        const upperQuery = query.value.trim().toUpperCase()
+        const conn = props.conName.replace(' ', '%20')
 
-    if (upperQuery.startsWith('SELECT')) {
-        resultType.value = ResultType.Table
-        result.value = await Post<TableData, string>(`/api/Select/${conn}`, upperQuery)
-    } else {
-        resultType.value = ResultType.Number
-        result.value = await Put<Number, string>(`/api/Exec/${conn}`, upperQuery)
+        if (upperQuery.startsWith('SELECT')) {
+            resultType.value = ResultType.Table
+            result.value = await Post<TableData, string>(`/api/Select/${conn}`, upperQuery)
+        } else {
+            resultType.value = ResultType.Number
+            result.value = await Put<Number, string>(`/api/Exec/${conn}`, upperQuery)
+        }
+    } catch (ex) {
+        alert(ex)
     }
 }
 

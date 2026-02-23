@@ -69,7 +69,8 @@ func PutConnection(c *gin.Context) {
 	conName := c.Query("newName")
 
 	if conName == "" {
-		conName = oldName
+		abort(c, http.StatusInternalServerError, "New connection name cannot be empty!",)
+		return 
 	}
 
 	if conName != oldName {

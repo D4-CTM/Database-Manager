@@ -89,7 +89,7 @@ function onConfirm() {
                 </div>
                 <div v-if="!credential.isNew" class="mb-3">
                     <label for="connectionNameInput" class="form-label">Connection Name</label>
-                    <input type="text" v-model.trim="conName" class="form-control" id="connectionNameInput">
+                    <input type="text" v-model="conName" class="form-control" id="connectionNameInput">
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" v-model="credential.ShowAll" class="form-check-input" id="showAllInput">
