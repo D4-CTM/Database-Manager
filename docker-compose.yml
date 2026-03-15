@@ -31,7 +31,7 @@ services:
       APP_USER: appuser 
       APP_USER_PASSWORD: appuser_pass
     volumes:
-      - ./init-scripts:/container-entrypoint-initdb.d
+      - ./init-scripts/oracle/:/container-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 10s
