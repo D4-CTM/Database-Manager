@@ -10,6 +10,13 @@ import (
 	_ "github.com/godror/godror"
 )
 
+type SlaveMasterPair struct {
+	// Slave is always an oracle credential
+	Slave Credentials
+	// Master is always a postgres credential
+	Master Credentials
+}
+
 type Credentials struct {
 	Database string
 	Server   string
@@ -71,7 +78,7 @@ func CreateCredFromGin(c *gin.Context) Credentials {
 
 }
 
-func (c *Credentials) Connect() error {
+func (c *Credentials) ConnectOracle() error {
 	if c.db != nil {
 		return nil
 	}
@@ -86,7 +93,7 @@ func (c *Credentials) Connect() error {
 
 func (c *Credentials) Ping() error {
 	if c.db == nil {
-		if err := c.Connect(); err != nil {
+		if err := c.ConnectOracle(); err != nil {
 			return nil
 		}
 	}

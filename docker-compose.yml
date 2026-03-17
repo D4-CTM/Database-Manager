@@ -40,3 +40,17 @@ services:
       start_period: 5s
       start_interval: 5s
     restart: unless-stopped
+
+  pagila:
+    image: postgres:17
+    container_name: pagila
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: postgres
+    volumes:
+      - ./init-scripts/postgres/pagila-schema.sql:/docker-entrypoint-initdb.d/1-pagila-schema.sql
+      - ./init-scripts/postgres/pagila-data.sql:/docker-entrypoint-initdb.d/2-pagila-data.sql
+    expose:
+      - 5432
+    ports:
+      - 5432:5432 
