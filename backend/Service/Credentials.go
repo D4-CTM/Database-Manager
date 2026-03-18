@@ -10,13 +10,6 @@ import (
 	_ "github.com/godror/godror"
 )
 
-type SlaveMasterPair struct {
-	// Slave is always an oracle credential
-	Slave Credentials
-	// Master is always a postgres credential
-	Master Credentials
-}
-
 type Credentials struct {
 	Database string
 	Server   string

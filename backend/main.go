@@ -52,6 +52,15 @@ func main() {
 	r.GET("/api/Query/Package/Body/:database", handler.GetPackageBody)
 	r.GET("/api/Query/DDL/:database", handler.GetDdl)
 
+	r.GET("/api/Sync/Pairs/list", handler.GetSlaveMasterPairs)
+	r.GET("/api/Sync/Pair", handler.GetSlaveMasterPair)
+	r.POST("/api/Sync/Pair", handler.PostSlaveMasterPair)
+	r.PUT("/api/Sync/Pair/:oldName", handler.PutSlaveMasterPair)
+	r.DELETE("/api/Sync/Pair/:conName", handler.DeleteConnection)
+
+	r.POST("/api/Sync/Slave/:key", handler.SyncSlave)
+	r.POST("/api/Sync/Master/:key", handler.SyncMaster)
+
 	go func() {
 		log.Printf("Server running at: http://localhost%s\n", ADDR)
 		if err := r.Run(ADDR); err != nil {
@@ -66,4 +75,5 @@ func main() {
 	_, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownRelease()
 	service.Cons.Close()
+	service.SlaveMaster.Close()
 }

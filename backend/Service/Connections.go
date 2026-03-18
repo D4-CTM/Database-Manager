@@ -20,6 +20,15 @@ func (c *Connections) Close() {
 
 type SlaveMasterMap map[string]SlaveMasterPair
 
+func (m *SlaveMasterMap) Close() {
+	for n, sm := range SlaveMaster {
+		if err := sm.Close(); err != nil {
+			log.Printf("[ERROR] %s: %v", n, err)
+		}
+	}
+	log.Println("\n[INFO] SlaveMasterPairs closed")
+}
+
 var (
 	Cons Connections
 	SlaveMaster SlaveMasterMap
@@ -45,6 +54,20 @@ func saveToJson(credsPath string, val any) error {
 	return nil
 }
 
+func SaveSlaveMasterPair() {
+	credsPath := os.Getenv("CREDS_SUBDIR")
+	log.Printf("[INFO] Saving %d SlaveMasterPairs at: %s", len(SlaveMaster), credsPath)
+	if len(SlaveMaster) == 0 {
+		log.Printf("[WARNING] SlaveMasterPairs map is empty")
+	}
+
+	if err := saveToJson(path.Join(credsPath, "slave-master.json"), SlaveMaster); err != nil {
+		log.Printf("[ERROR] %v",err)
+		return
+	}
+	log.Printf("[INFO] SlaveMasterPairs saved")
+}
+
 func SaveConnections() {
 	credsPath := os.Getenv("CREDS_SUBDIR")
 	log.Printf("[INFO] Saving %d credentials at: %s", len(Cons), credsPath)
@@ -53,10 +76,6 @@ func SaveConnections() {
 	}
 
 	if err := saveToJson(path.Join(credsPath, "credentials.json"), Cons); err != nil {
-		log.Printf("[ERROR] %v",err)
-		return
-	}
-	if err := saveToJson(path.Join(credsPath, "slave-master.json"), SlaveMaster); err != nil {
 		log.Printf("[ERROR] %v",err)
 		return
 	}
